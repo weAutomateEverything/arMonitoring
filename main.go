@@ -56,6 +56,8 @@ func main() {
 		signal.Notify(c, syscall.SIGINT)
 		errs <- fmt.Errorf("%s", <-c)
 	}()
+
+	logger.Log("terminated", <-errs)
 }
 
 func accessControl(h http.Handler) http.Handler {

@@ -19,7 +19,9 @@ type service struct {
 }
 
 func NewService() Service {
-	return &service{}
+	s := &service{}
+	s.ConfirmUgandaFileAvailability()
+	return s
 }
 
 type File struct {
@@ -74,9 +76,10 @@ func (s *service) pathToMostRecentFile(dirPath, fileContains string) (string, ti
 }
 
 func (s *service) ConfirmUgandaFileAvailability() {
-	fileName, fileModTime, err := s.pathToMostRecentFile("/mnt/uganda/", ".txt")
+	fileName, fileModTime, err := s.pathToMostRecentFile("/mnt/uganda/", ".TXT")
 	if err != nil {
 		log.Println("Uganda file has not arrived yet")
+	} else {
+		log.Println(fmt.Sprintf("%v successfully received on %v", fileName, fileModTime))
 	}
-	log.Println(fmt.Sprintf("%v successfully received on %v", fileName, fileModTime))
 }
