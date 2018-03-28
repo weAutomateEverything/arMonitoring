@@ -23,4 +23,3 @@ func (s *loggingService) ConfirmUgandaFileAvailability() {
 	}(time.Now())
 	s.Service.ConfirmUgandaFileAvailability()
 }
-

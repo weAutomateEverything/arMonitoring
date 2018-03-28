@@ -2,11 +2,11 @@ package fileAvailability
 
 import (
 	"fmt"
+	"github.com/jasonlvhit/gocron"
 	"io/ioutil"
+	"log"
 	"strings"
 	"time"
-	"log"
-	"github.com/jasonlvhit/gocron"
 )
 
 type Service interface {
@@ -70,12 +70,12 @@ func (s *service) pathToMostRecentFile(dirPath, fileContains string) (string, ti
 			return file.Name, file.LastModified, nil
 		}
 	}
-	return "", time.Time{nil,nil, nil}, fmt.Errorf("%v file has not arrived yet", fileContains)
+	return "", time.Time{nil, nil, nil}, fmt.Errorf("%v file has not arrived yet", fileContains)
 }
 
 func (s *service) ConfirmUgandaFileAvailability() {
-	fileName, fileModTime, err := s.pathToMostRecentFile("/mnt/uganda/",".txt")
-	if err != nil{
+	fileName, fileModTime, err := s.pathToMostRecentFile("/mnt/uganda/", ".txt")
+	if err != nil {
 		log.Println("Uganda file has not arrived yet")
 	}
 	log.Println(fmt.Sprintf("%v successfully received on %v", fileName, fileModTime))

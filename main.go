@@ -1,18 +1,18 @@
 package main
 
-import(
+import (
 	"fmt"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"os"
 	"net/http"
-	
+	"os"
+
+	"github.com/weAutomateEverything/arMonitoring/fileAvailability"
 	"os/signal"
 	"syscall"
-	"github.com/weAutomateEverything/arMonitoring/fileAvailability"
 )
 
 func main() {
@@ -25,7 +25,7 @@ func main() {
 	fieldKeys := []string{"method"}
 
 	fa := fileAvailability.NewService()
-	fa = fileAvailability.NewLoggingService(log.With(logger,"component", "fileAvailability"), fa)
+	fa = fileAvailability.NewLoggingService(log.With(logger, "component", "fileAvailability"), fa)
 	fa = fileAvailability.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace: "api",
 		Subsystem: "fileAvailability",
@@ -42,7 +42,7 @@ func main() {
 	//httpLogger := log.With(logger, "component", "http")
 
 	mux := http.NewServeMux()
-	
+
 	http.Handle("/", accessControl(mux))
 	http.Handle("/metrics", promhttp.Handler())
 
