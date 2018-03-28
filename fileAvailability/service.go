@@ -70,7 +70,7 @@ func (s *service) pathToMostRecentFile(dirPath, fileContains string) (string, ti
 			return file.Name, file.LastModified, nil
 		}
 	}
-	return "", time.Time{nil, nil, nil}, fmt.Errorf("%v file has not arrived yet", fileContains)
+	return "", time.Time{}, fmt.Errorf("%v file has not arrived yet", fileContains)
 }
 
 func (s *service) ConfirmUgandaFileAvailability() {
