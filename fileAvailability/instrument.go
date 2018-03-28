@@ -19,10 +19,10 @@ func NewInstrumentService(counter metrics.Counter, latency metrics.Histogram, s 
 	}
 }
 
-func (s *instrumentingService) ConfirmUgandaFileAvailability() (string, string) {
+func (s *instrumentingService) ConfirmUgandaFileAvailability() {
 	defer func(begin time.Time) {
 		s.requestCount.With("method", "GetFilesInPath").Add(1)
 		s.requestLatency.With("method", "GetFilesInPath").Observe(time.Since(begin).Seconds())
 	}(time.Now())
-	return s.Service.ConfirmUgandaFileAvailability()
+	s.Service.ConfirmUgandaFileAvailability()
 }
