@@ -40,7 +40,7 @@ func main() {
 			Help:      "Total duration of requests in microseconds.",
 		}, fieldKeys), fa)
 
-	mo := mountShares.NewService()
+	mo := mountShares.NewService(fa)
 	mo = mountShares.NewLoggingService(log.With(logger, "component", "mountShares"), mo)
 	mo = mountShares.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace: "api",

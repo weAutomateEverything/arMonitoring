@@ -6,20 +6,27 @@ import (
 	"os"
 	"os/exec"
 	"sync"
+	"github.com/weAutomateEverything/arMonitoring/fileAvailability"
 )
 
 type Service interface {
 	MountShares()
+	ConfirmSharesExist()
 }
 
 type service struct {
+	fileAvailable fileAvailability.Service
 	SharesAvailable bool
 }
 
-func NewService() Service {
-	s := &service{}
+func NewService(files fileAvailability.Service) Service {
+	s := &service{fileAvailable: files}
 
 	return s
+}
+
+func (s *service) ConfirmSharesExist(){
+	s.fileAvailable.
 }
 
 func (s *service) MountShares() {
