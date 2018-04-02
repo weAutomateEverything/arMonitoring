@@ -13,6 +13,7 @@ import (
 	"github.com/weAutomateEverything/arMonitoring/fileAvailability"
 	"os/signal"
 	"syscall"
+	"github.com/weAutomateEverything/arMonitoring/mountShares"
 )
 
 func main() {
@@ -38,6 +39,21 @@ func main() {
 			Name:      "request_latency_microseconds",
 			Help:      "Total duration of requests in microseconds.",
 		}, fieldKeys), fa)
+
+	mo := mountShares.NewService(fa)
+	mo = mountShares.NewLoggingService(log.With(logger, "component", "mountShares"), mo)
+	mo = mountShares.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
+		Namespace: "api",
+		Subsystem: "mountShares",
+		Name:      "request_count",
+		Help:      "Number of requests received.",
+	}, fieldKeys),
+		kitprometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
+			Namespace: "api",
+			Subsystem: "mountShares",
+			Name:      "request_latency_microseconds",
+			Help:      "Total duration of requests in microseconds.",
+		}, fieldKeys), mo)
 
 	//httpLogger := log.With(logger, "component", "http")
 

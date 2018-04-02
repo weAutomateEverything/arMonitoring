@@ -23,3 +23,13 @@ func (s *loggingService) ConfirmUgandaFileAvailability() {
 	}(time.Now())
 	s.Service.ConfirmUgandaFileAvailability()
 }
+
+func (s *loggingService) GetFilesInPath(path string) {
+	defer func(begin time.Time) {
+		s.logger.Log(
+			"method", "ConfirmUgandaFileAvailability",
+			"took", time.Since(begin),
+		)
+	}(time.Now())
+	s.Service.GetFilesInPath(path)
+}

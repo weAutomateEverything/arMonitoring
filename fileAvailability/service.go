@@ -10,7 +10,7 @@ import (
 )
 
 type Service interface {
-	getFilesInPath(path string) ([]File, error)
+	GetFilesInPath(path string) ([]File, error)
 	pathToMostRecentFile(dirPath, fileContains string) (string, time.Time, error)
 	ConfirmUgandaFileAvailability()
 }
@@ -40,7 +40,7 @@ func (s *service) schedule() {
 	}()
 }
 
-func (s *service) getFilesInPath(path string) ([]File, error) {
+func (s *service) GetFilesInPath(path string) ([]File, error) {
 
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
@@ -57,7 +57,7 @@ func (s *service) getFilesInPath(path string) ([]File, error) {
 
 func (s *service) pathToMostRecentFile(dirPath, fileContains string) (string, time.Time, error) {
 
-	fileList, err := s.getFilesInPath(dirPath)
+	fileList, err := s.GetFilesInPath(dirPath)
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to access %v", dirPath))
 	}
