@@ -27,10 +27,10 @@ func (s *instrumentingService) ConfirmUgandaFileAvailability() {
 	s.Service.ConfirmUgandaFileAvailability()
 }
 
-func (s *instrumentingService) GetFilesInPath(path string) {
+func (s *instrumentingService) GetFilesInPath(path string) ([]File, error){
 	defer func(begin time.Time) {
 		s.requestCount.With("method", "GetFilesInPath").Add(1)
 		s.requestLatency.With("method", "GetFilesInPath").Observe(time.Since(begin).Seconds())
 	}(time.Now())
-	s.Service.GetFilesInPath(path)
+	return s.Service.GetFilesInPath(path)
 }
