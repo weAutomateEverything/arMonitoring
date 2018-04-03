@@ -20,7 +20,7 @@ type service struct {
 
 func NewService() Service {
 	s := &service{}
-	s.ConfirmUgandaFileAvailability()
+	//s.ConfirmUgandaFileAvailability()
 	return s
 }
 
