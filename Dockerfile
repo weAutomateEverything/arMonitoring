@@ -1,4 +1,7 @@
 FROM alpine:3.6
-RUN apk update
-RUN apk add cifs-utils
-RUN mkdir /mnt/share01 && mkdir /mnt/share02
+
+WORKDIR /app
+# Now just add the binary
+COPY arMonitoring /app/
+ENTRYPOINT ["/app/arMonitoring"]
+EXPOSE 8002
