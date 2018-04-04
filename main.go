@@ -13,7 +13,6 @@ import (
 	"github.com/weAutomateEverything/arMonitoring/fileAvailability"
 	"os/signal"
 	"syscall"
-	"github.com/weAutomateEverything/arMonitoring/mountShares"
 )
 
 func main() {
