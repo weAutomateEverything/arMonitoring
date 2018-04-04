@@ -7,6 +7,7 @@ import (
 	"log"
 	"strings"
 	"time"
+	"github.com/matryer/try"
 )
 
 type Service interface {
@@ -32,11 +33,11 @@ type File struct {
 }
 
 func (s *service) schedule() {
-	confirmAvailability := gocron.NewScheduler()
+	confirmUgandaAvailability := gocron.NewScheduler()
 
 	go func() {
-		confirmAvailability.Every(1).Day().At("00:05").Do(s.ConfirmUgandaFileAvailability)
-		<-confirmAvailability.Start()
+		confirmUgandaAvailability.Every(1).Day().At("00:05").Do(s.ConfirmUgandaFileAvailability)
+		<-confirmUgandaAvailability.Start()
 	}()
 }
 
@@ -58,7 +59,7 @@ func (s *service) GetFilesInPath(path string) ([]File, error) {
 func (s *service) pathToMostRecentFile(dirPath, fileContains string) (string, time.Time, error) {
 
 	fileList, err := s.GetFilesInPath(dirPath)
-	if err != nil {
+	if err != nil || len(fileList) == 0{
 		log.Println(fmt.Sprintf("Unable to access %v", dirPath))
 	}
 
@@ -75,11 +76,27 @@ func (s *service) pathToMostRecentFile(dirPath, fileContains string) (string, ti
 	return "", time.Time{}, fmt.Errorf("%v file has not arrived yet", fileContains)
 }
 
-func (s *service) ConfirmUgandaFileAvailability() {
-	fileName, fileModTime, err := s.pathToMostRecentFile("/mnt/uganda/", ".TXT")
+func (s *service) ConfirmFileAvailabilityMethod(path string) error{
+	fileName, fileModTime, err := s.pathToMostRecentFile(path, ".TXT")
 	if err != nil {
-		log.Println("Uganda file has not arrived yet")
-	} else {
+		return err
+	} 
 		log.Println(fmt.Sprintf("%v successfully received on %v", fileName, fileModTime))
+	
+}
+
+func (s *service) ConfirmUgandaFileAvailability() {
+	err := try.Do(func(attempt int) (bool, error) {
+		try.MaxRetries = 120
+		var err error
+		err = s.ConfirmFileAvailabilityMethod("/mnt/uganda")
+		if err != nil {
+			log.Println("Uganda file not yet detected. Next attempt in 2 minutes...")
+			time.Sleep(2 * time.Minute) // wait 2 minutes
+		}
+		return true, err
+	})
+	if err != nil {
+		log.Println(err)
 	}
 }
