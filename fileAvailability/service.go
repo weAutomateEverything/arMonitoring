@@ -13,7 +13,7 @@ import (
 type Service interface {
 	GetFilesInPath(path string) ([]File, error)
 	pathToMostRecentFile(dirPath, fileContains string) (string, time.Time, error)
-	ConfirmFileAvailability()
+	ConfirmUgandaFileAvailability()
 }
 
 type service struct {
