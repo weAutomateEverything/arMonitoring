@@ -39,10 +39,12 @@ func main() {
 			Help:      "Total duration of requests in microseconds.",
 		}, fieldKeys), fa)
 
-	//httpLogger := log.With(logger, "component", "http")
+	httpLogger := log.With(logger, "component", "http")
 
 	mux := http.NewServeMux()
 
+	mux.Handle("/fileStatus", fileAvailability.MakeHandler(fa, httpLogger, nil))
+	
 	http.Handle("/", accessControl(mux))
 	http.Handle("/metrics", promhttp.Handler())
 
