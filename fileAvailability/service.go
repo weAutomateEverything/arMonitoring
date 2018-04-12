@@ -67,10 +67,60 @@ func NewService() Service {
 
 func (s *service) schedule() {
 	confirmUgandaAvailability := gocron.NewScheduler()
+	confirmBotswanaAvailability := gocron.NewScheduler()
+	confirmMalawiAvailability := gocron.NewScheduler()
+	confirmGhanaAvailability := gocron.NewScheduler()
+	confirmKenyaAvailability := gocron.NewScheduler()
+	confirmNamibiaAvailability := gocron.NewScheduler()
+	confirmUgandaDRAvailability := gocron.NewScheduler()
+	confirmZambiaAvailability := gocron.NewScheduler()
+	confirmZambiaDRAvailability := gocron.NewScheduler()
+	confirmZambiaProdAvailability := gocron.NewScheduler()
+	confirmZimbabweAvailability := gocron.NewScheduler()
 
 	go func() {
 		confirmUgandaAvailability.Every(1).Day().At("00:00").Do(s.ConfirmUgandaFileAvailability)
 		<-confirmUgandaAvailability.Start()
+	}()
+	go func() {
+		confirmBotswanaAvailability.Every(1).Day().At("00:00").Do(s.ConfirmBotswanaFileAvailability)
+		<-confirmBotswanaAvailability.Start()
+	}()
+	go func() {
+		confirmMalawiAvailability.Every(1).Day().At("00:00").Do(s.ConfirmMalawiFileAvailability)
+		<-confirmMalawiAvailability.Start()
+	}()
+	go func() {
+		confirmGhanaAvailability.Every(1).Day().At("00:00").Do(s.ConfirmGhanaFileAvailability)
+		<-confirmGhanaAvailability.Start()
+	}()
+	go func() {
+		confirmKenyaAvailability.Every(1).Day().At("00:00").Do(s.ConfirmKenyaFileAvailability)
+		<-confirmKenyaAvailability.Start()
+	}()
+	go func() {
+		confirmNamibiaAvailability.Every(1).Day().At("00:00").Do(s.ConfirmNamibiaFileAvailability)
+		<-confirmNamibiaAvailability.Start()
+	}()
+	go func() {
+		confirmUgandaDRAvailability.Every(1).Day().At("00:00").Do(s.ConfirmUgandaDRFileAvailability)
+		<-confirmUgandaDRAvailability.Start()
+	}()
+	go func() {
+		confirmZambiaAvailability.Every(1).Day().At("00:00").Do(s.ConfirmZambiaFileAvailability)
+		<-confirmZambiaAvailability.Start()
+	}()
+	go func() {
+		confirmZambiaDRAvailability.Every(1).Day().At("00:00").Do(s.ConfirmZambiaDRFileAvailability)
+		<-confirmZambiaDRAvailability.Start()
+	}()
+	go func() {
+		confirmZambiaProdAvailability.Every(1).Day().At("00:00").Do(s.ConfirmZambiaProdFileAvailability)
+		<-confirmZambiaProdAvailability.Start()
+	}()
+	go func() {
+		confirmZimbabweAvailability.Every(1).Day().At("00:00").Do(s.ConfirmZimbabweFileAvailability)
+		<-confirmZimbabweAvailability.Start()
 	}()
 }
 
