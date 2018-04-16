@@ -70,6 +70,7 @@ func (s *service) schedule() {
 	confirmZambiaDRAvailability := gocron.NewScheduler()
 	confirmZambiaProdAvailability := gocron.NewScheduler()
 	confirmZimbabweAvailability := gocron.NewScheduler()
+	resetStatus := gocron.NewScheduler()
 
 	go func() {
 		confirmUgandaAvailability.Every(1).Day().At("00:00").Do(s.ConfirmUgandaFileAvailability)
@@ -114,6 +115,10 @@ func (s *service) schedule() {
 	go func() {
 		confirmZimbabweAvailability.Every(1).Day().At("00:00").Do(s.ConfirmZimbabweFileAvailability)
 		<-confirmZimbabweAvailability.Start()
+	}()
+	go func() {
+		resetStatus.Every(1).Day().At("00:00").Do(s.resetStatus)
+		<-resetStatus.Start()
 	}()
 }
 
@@ -203,6 +208,20 @@ func (s *service) CreateJSONResponse() map[string]bool {
 	}
 
 	return resp
+}
+
+func (s *service) resetStatus() {
+	ZimbabweStatus = false
+	BotswanaStatus = false
+	KenyaStatus = false
+	MalawiStatus = false
+	NamibiaStatus = false
+	GhanaStatus = false
+	UgandaStatus = false
+	UgandaDRStatus = false
+	ZambiaStatus = false
+	ZambiaDRStatus = false
+	ZambiaProdStatus = false
 }
 
 func (s *service) ConfirmZimbabweFileAvailability() {
