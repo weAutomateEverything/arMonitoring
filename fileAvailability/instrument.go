@@ -27,7 +27,7 @@ func (s *instrumentingService) ConfirmUgandaFileAvailability() {
 	s.Service.ConfirmUgandaFileAvailability()
 }
 
-func (s *instrumentingService) GetFilesInPath(path string) ([]File, error) {
+func (s *instrumentingService) GetFilesInPath(path string) ([]string, error) {
 	defer func(begin time.Time) {
 		s.requestCount.With("method", "GetFilesInPath").Add(1)
 		s.requestLatency.With("method", "GetFilesInPath").Observe(time.Since(begin).Seconds())

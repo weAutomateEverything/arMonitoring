@@ -24,7 +24,7 @@ func (s *loggingService) ConfirmUgandaFileAvailability() {
 	s.Service.ConfirmUgandaFileAvailability()
 }
 
-func (s *loggingService) GetFilesInPath(path string) ([]File, error) {
+func (s *loggingService) GetFilesInPath(path string) ([]string, error) {
 	defer func(begin time.Time) {
 		s.logger.Log(
 			"method", "ConfirmUgandaFileAvailability",

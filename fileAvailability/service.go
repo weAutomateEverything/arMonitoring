@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"github.com/jasonlvhit/gocron"
 	"github.com/matryer/try"
-	"io/ioutil"
 	"log"
+	"os"
 	"strings"
 	"time"
 )
 
 type Service interface {
-	GetFilesInPath(path string) ([]File, error)
-	pathToMostRecentFile(dirPath, fileContains string) (bool, string, time.Time, error)
+	GetFilesInPath(path string) ([]string, error)
+	pathToMostRecentFile(dirPath, fileContains string) (bool, string, error)
 	ConfirmUgandaFileAvailability()
 	CreateJSONResponse() map[string]bool
 }
@@ -34,13 +34,6 @@ var (
 	ZambiaProdStatus bool
 )
 
-//type FileStatus struct {
-//	location     string
-//	path         string
-//	received     bool
-//	timeReceived time.Time
-//}
-
 type File struct {
 	Name         string
 	Path         string
@@ -51,17 +44,17 @@ type File struct {
 func NewService() Service {
 	s := &service{}
 	s.ConfirmUgandaFileAvailability()
-	s.ConfirmBotswanaFileAvailability()
-	s.ConfirmGhanaFileAvailability()
-	s.ConfirmKenyaFileAvailability()
-	s.ConfirmMalawiFileAvailability()
-	s.ConfirmNamibiaFileAvailability()
-	s.ConfirmUgandaDRFileAvailability()
-	s.ConfirmZambiaFileAvailability()
-	s.ConfirmZambiaDRFileAvailability()
-	s.ConfirmZambiaProdFileAvailability()
-	s.ConfirmZimbabweFileAvailability()
-	
+	//s.ConfirmBotswanaFileAvailability()
+	//s.ConfirmGhanaFileAvailability()
+	//s.ConfirmKenyaFileAvailability()
+	//s.ConfirmMalawiFileAvailability()
+	//s.ConfirmNamibiaFileAvailability()
+	//s.ConfirmUgandaDRFileAvailability()
+	//s.ConfirmZambiaFileAvailability()
+	//s.ConfirmZambiaDRFileAvailability()
+	//s.ConfirmZambiaProdFileAvailability()
+	//s.ConfirmZimbabweFileAvailability()
+
 	return s
 }
 
@@ -124,43 +117,42 @@ func (s *service) schedule() {
 	}()
 }
 
-func (s *service) GetFilesInPath(path string) ([]File, error) {
+func (s *service) GetFilesInPath(path string) ([]string, error) {
 
-	files, err := ioutil.ReadDir(path)
+	dir, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 
-	result := make([]File, len(files))
+	defer dir.Close()
 
-	for x, file := range files {
-		result[x] = File{Name: file.Name(), LastModified: file.ModTime(), Path: path, Size: file.Size()}
-	}
-	return result, nil
+	list, _ := dir.Readdirnames(0)
+
+	return list, nil
 }
 
-func (s *service) pathToMostRecentFile(dirPath, fileContains string) (bool, string, time.Time, error) {
+func (s *service) pathToMostRecentFile(dirPath, fileContains string) (bool, string, error) {
 
 	fileList, err := s.GetFilesInPath(dirPath)
 	if err != nil || len(fileList) == 0 {
 		log.Println(fmt.Sprintf("Unable to access %v", dirPath))
 	}
 
-	currentDate := time.Now().Format("02/01/2006")
+	currentDate := time.Now().Format("20060102")
 
 	for _, file := range fileList {
-		cont := strings.Contains(file.Name, fileContains)
+		cont := strings.Contains(file, fileContains)
+		recent := strings.Contains(file, currentDate)
 
-		daDate := file.LastModified.Format("02/01/2006")
-		if daDate == currentDate && cont == true {
-			return true, file.Name, file.LastModified, nil
+		if recent == true && cont == true {
+			return true, file, nil
 		}
 	}
-	return false, "", time.Time{}, fmt.Errorf("%v file has not arrived yet", fileContains)
+	return false, "", fmt.Errorf("%v file has not arrived yet", fileContains)
 }
 
 func (s *service) ConfirmFileAvailabilityMethod(path string) error {
-	fileReceived, _, _, err := s.pathToMostRecentFile(path, ".txt")
+	fileReceived, _, err := s.pathToMostRecentFile(path, ".TXT")
 
 	if err != nil {
 		return err
