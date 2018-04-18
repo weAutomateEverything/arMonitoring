@@ -21,7 +21,7 @@ func (s *loggingService) ConfirmUgandaFileAvailability() {
 			"took", time.Since(begin),
 		)
 	}(time.Now())
-	s.Service.ConfirmUgandaFileAvailability()
+	s.Service.ConfirmZimbabweFileAvailability()
 }
 
 func (s *loggingService) GetFilesInPath(path string) ([]string, error) {
