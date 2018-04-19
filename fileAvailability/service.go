@@ -3,7 +3,6 @@ package fileAvailability
 import (
 	"fmt"
 	"github.com/jasonlvhit/gocron"
-	"github.com/matryer/try"
 	"log"
 	"os"
 	"strings"
@@ -36,16 +35,16 @@ type LocationStatus struct {
 }
 
 type FilesReceived struct {
-	SE147    bool
-	GL147    bool
-	MUL00004 bool
-	SR00001  bool
+	SE       bool
+	GL       bool
+	MUL      bool
+	SR       bool
 	TXN      bool
-	DA147    bool
-	MS147    bool
-	EP747    bool
-	VTRAN147 bool
-	VOUT147  bool
+	DA       bool
+	MS       bool
+	EP    bool
+	VTRAN    bool
+	VOUT     bool
 	SPTLSB   bool
 	CGNI     bool
 	INT00001 bool
@@ -59,16 +58,16 @@ var locationStatus LocationStatus
 
 func NewService() Service {
 	s := &service{}
-	//s.ConfirmBotswanaFileAvailability()
-	//s.ConfirmGhanaFileAvailability()
-	//s.ConfirmKenyaFileAvailability()
-	//s.ConfirmMalawiFileAvailability()
-	//s.ConfirmNamibiaFileAvailability()
+	//go s.ConfirmBotswanaFileAvailability()
+	//go s.ConfirmGhanaFileAvailability()
+	//go s.ConfirmKenyaFileAvailability()
+	go s.ConfirmMalawiFileAvailability()
+	//go s.ConfirmNamibiaFileAvailability()
 	go s.ConfirmUgandaFileAvailability()
-	//s.ConfirmUgandaDRFileAvailability()
-	//s.ConfirmZambiaFileAvailability()
-	//s.ConfirmZambiaDRFileAvailability()
-	//s.ConfirmZambiaProdFileAvailability()
+	//go s.ConfirmUgandaDRFileAvailability()
+	go s.ConfirmZambiaFileAvailability()
+	//go s.ConfirmZambiaDRFileAvailability()
+	//go s.ConfirmZambiaProdFileAvailability()
 	go s.ConfirmZimbabweFileAvailability()
 
 	return s
@@ -86,42 +85,41 @@ func (s *service) schedule() {
 	confirmZambiaDRAvailability := gocron.NewScheduler()
 	confirmZambiaProdAvailability := gocron.NewScheduler()
 	confirmZimbabweAvailability := gocron.NewScheduler()
-	resetStatus := gocron.NewScheduler()
 
 	go func() {
 		confirmUgandaAvailability.Every(1).Minute().Do(s.ConfirmUgandaFileAvailability)
 		<-confirmUgandaAvailability.Start()
 	}()
 	go func() {
-		confirmBotswanaAvailability.Every(1).Day().At("00:00").Do(s.ConfirmBotswanaFileAvailability)
+		confirmBotswanaAvailability.Every(1).Minute().Do(s.ConfirmBotswanaFileAvailability)
 		<-confirmBotswanaAvailability.Start()
 	}()
 	go func() {
-		confirmMalawiAvailability.Every(1).Day().At("00:00").Do(s.ConfirmMalawiFileAvailability)
+		confirmMalawiAvailability.Every(1).Minute().Do(s.ConfirmMalawiFileAvailability)
 		<-confirmMalawiAvailability.Start()
 	}()
 	go func() {
-		confirmGhanaAvailability.Every(1).Day().At("00:00").Do(s.ConfirmGhanaFileAvailability)
+		confirmGhanaAvailability.Every(1).Minute().Do(s.ConfirmGhanaFileAvailability)
 		<-confirmGhanaAvailability.Start()
 	}()
 	go func() {
-		confirmKenyaAvailability.Every(1).Day().At("00:00").Do(s.ConfirmKenyaFileAvailability)
+		confirmKenyaAvailability.Every(1).Minute().Do(s.ConfirmKenyaFileAvailability)
 		<-confirmKenyaAvailability.Start()
 	}()
 	go func() {
-		confirmNamibiaAvailability.Every(1).Day().At("00:00").Do(s.ConfirmNamibiaFileAvailability)
+		confirmNamibiaAvailability.Every(1).Minute().Do(s.ConfirmNamibiaFileAvailability)
 		<-confirmNamibiaAvailability.Start()
 	}()
 	go func() {
-		confirmUgandaDRAvailability.Every(1).Day().At("00:00").Do(s.ConfirmUgandaDRFileAvailability)
+		confirmUgandaDRAvailability.Every(1).Minute().Do(s.ConfirmUgandaDRFileAvailability)
 		<-confirmUgandaDRAvailability.Start()
 	}()
 	go func() {
-		confirmZambiaAvailability.Every(1).Day().At("00:00").Do(s.ConfirmZambiaFileAvailability)
+		confirmZambiaAvailability.Every(1).Minute().Do(s.ConfirmZambiaFileAvailability)
 		<-confirmZambiaAvailability.Start()
 	}()
 	go func() {
-		confirmZambiaDRAvailability.Every(1).Day().At("00:00").Do(s.ConfirmZambiaDRFileAvailability)
+		confirmZambiaDRAvailability.Every(1).Minute().Do(s.ConfirmZambiaDRFileAvailability)
 		<-confirmZambiaDRAvailability.Start()
 	}()
 	go func() {
@@ -131,10 +129,6 @@ func (s *service) schedule() {
 	go func() {
 		confirmZimbabweAvailability.Every(1).Minute().Do(s.ConfirmZimbabweFileAvailability)
 		<-confirmZimbabweAvailability.Start()
-	}()
-	go func() {
-		resetStatus.Every(1).Day().At("00:00").Do(s.resetStatus)
-		<-resetStatus.Start()
 	}()
 }
 
@@ -196,16 +190,16 @@ func (s *service) fileCount(dirPath, fileContains string) int {
 
 func (s *service) ConfirmFileAvailabilityMethod(path string) error {
 
-	SE147, _ := s.pathToMostRecentFile(path, "SE")
-	GL147, _ := s.pathToMostRecentFile(path, "GL")
-	MUL00004, _ := s.pathToMostRecentFile(path, "MUL")
-	SR00001, _ := s.pathToMostRecentFile(path, "SR")
+	SE, _ := s.pathToMostRecentFile(path, "SE")
+	GL, _ := s.pathToMostRecentFile(path, "GL")
+	MUL, _ := s.pathToMostRecentFile(path, "MUL")
+	SR, _ := s.pathToMostRecentFile(path, "SR")
 	TXN, _ := s.pathToMostRecentFile(path, "TXN")
-	DA147, _ := s.pathToMostRecentFile(path, "DA")
-	MS147, _ := s.pathToMostRecentFile(path, "MS")
-	EP747, _ := s.pathToMostRecentFile(path, "EP747")
-	VTRAN147, _ := s.pathToMostRecentFile(path, "VTRAN")
-	VOUT147, _ := s.pathToMostRecentFile(path, "VOUT")
+	DA, _ := s.pathToMostRecentFile(path, "DA")
+	MS, _ := s.pathToMostRecentFile(path, "MS")
+	EP, _ := s.pathToMostRecentFile(path, "EP")
+	VTRAN, _ := s.pathToMostRecentFile(path, "VTRAN")
+	VOUT, _ := s.pathToMostRecentFile(path, "VOUT")
 	SPTLSB, _ := s.pathToMostRecentFile(path, "SPTLSB")
 	CGNI, _ := s.pathToMostRecentFile(path, "CGNI")
 	INT00001, _ := s.pathToMostRecentFile(path, "INT00001")
@@ -217,119 +211,203 @@ func (s *service) ConfirmFileAvailabilityMethod(path string) error {
 
 	switch path {
 	case "/mnt/zimbabwe":
-		locationStatus.ZimbabweStatus.SE147 = SE147
-		locationStatus.ZimbabweStatus.GL147 = GL147
+		locationStatus.ZimbabweStatus.SE = SE
+		locationStatus.ZimbabweStatus.GL = GL
 		locationStatus.ZimbabweStatus.TXN = TXN
-		locationStatus.ZimbabweStatus.VTRAN147 = VTRAN147
-		locationStatus.ZimbabweStatus.VOUT147 = VOUT147
-		locationStatus.ZimbabweStatus.MS147 = MS147
-		locationStatus.ZimbabweStatus.DA147 = DA147
-		locationStatus.ZimbabweStatus.EP747 = EP747
+		locationStatus.ZimbabweStatus.MUL = MUL
+		locationStatus.ZimbabweStatus.VTRAN = VTRAN
+		locationStatus.ZimbabweStatus.VOUT = VOUT
+		locationStatus.ZimbabweStatus.MS = MS
+		locationStatus.ZimbabweStatus.DA = DA
+		locationStatus.ZimbabweStatus.INT00001 = INT00001
+		locationStatus.ZimbabweStatus.INT00003 = INT00003
+		locationStatus.ZimbabweStatus.INT00007 = INT00007
+		locationStatus.ZimbabweStatus.SR = SR
+		locationStatus.ZimbabweStatus.EP = EP
+		locationStatus.ZimbabweStatus.SPTLSB = SPTLSB
+		locationStatus.ZimbabweStatus.CGNI = CGNI
 		locationStatus.ZimbabweStatus.PDF = PDF
 		locationStatus.ZimbabweStatus.TT140 = TT140
 	case "/mnt/botswana":
-		locationStatus.BotswanaStatus.SE147 = SE147
-		locationStatus.BotswanaStatus.GL147 = GL147
+		locationStatus.BotswanaStatus.SE = SE
+		locationStatus.BotswanaStatus.GL = GL
 		locationStatus.BotswanaStatus.TXN = TXN
-		locationStatus.BotswanaStatus.MUL00004 = MUL00004
-		locationStatus.BotswanaStatus.VTRAN147 = VTRAN147
-		locationStatus.BotswanaStatus.VOUT147 = VOUT147
-		locationStatus.BotswanaStatus.MS147 = MS147
-		locationStatus.BotswanaStatus.DA147 = DA147
-		locationStatus.BotswanaStatus.EP747 = EP747
+		locationStatus.BotswanaStatus.MUL = MUL
+		locationStatus.BotswanaStatus.VTRAN = VTRAN
+		locationStatus.BotswanaStatus.VOUT = VOUT
+		locationStatus.BotswanaStatus.MS = MS
+		locationStatus.BotswanaStatus.DA = DA
+		locationStatus.BotswanaStatus.INT00001 = INT00001
+		locationStatus.BotswanaStatus.INT00003 = INT00003
+		locationStatus.BotswanaStatus.INT00007 = INT00007
+		locationStatus.BotswanaStatus.SR = SR
+		locationStatus.BotswanaStatus.EP = EP
+		locationStatus.BotswanaStatus.SPTLSB = SPTLSB
+		locationStatus.BotswanaStatus.CGNI = CGNI
+		locationStatus.BotswanaStatus.PDF = PDF
+		locationStatus.BotswanaStatus.TT140 = TT140
 	case "/mnt/ghana":
-		locationStatus.GhanaStatus.SE147 = SE147
-		locationStatus.GhanaStatus.GL147 = GL147
+		locationStatus.GhanaStatus.SE = SE
+		locationStatus.GhanaStatus.GL = GL
 		locationStatus.GhanaStatus.TXN = TXN
-		locationStatus.GhanaStatus.MUL00004 = MUL00004
-		locationStatus.GhanaStatus.VTRAN147 = VTRAN147
-		locationStatus.GhanaStatus.VOUT147 = VOUT147
-		locationStatus.GhanaStatus.MS147 = MS147
-		locationStatus.GhanaStatus.DA147 = DA147
-		locationStatus.GhanaStatus.EP747 = EP747
+		locationStatus.GhanaStatus.MUL = MUL
+		locationStatus.GhanaStatus.VTRAN = VTRAN
+		locationStatus.GhanaStatus.VOUT = VOUT
+		locationStatus.GhanaStatus.MS = MS
+		locationStatus.GhanaStatus.DA = DA
+		locationStatus.GhanaStatus.INT00001 = INT00001
+		locationStatus.GhanaStatus.INT00003 = INT00003
+		locationStatus.GhanaStatus.INT00007 = INT00007
+		locationStatus.GhanaStatus.SR = SR
+		locationStatus.GhanaStatus.EP = EP
+		locationStatus.GhanaStatus.SPTLSB = SPTLSB
+		locationStatus.GhanaStatus.CGNI = CGNI
+		locationStatus.GhanaStatus.PDF = PDF
+		locationStatus.GhanaStatus.TT140 = TT140
 	case "/mnt/kenya":
-		locationStatus.KenyaStatus.SE147 = SE147
-		locationStatus.KenyaStatus.GL147 = GL147
+		locationStatus.KenyaStatus.SE = SE
+		locationStatus.KenyaStatus.GL = GL
 		locationStatus.KenyaStatus.TXN = TXN
-		locationStatus.KenyaStatus.MUL00004 = MUL00004
-		locationStatus.KenyaStatus.VTRAN147 = VTRAN147
-		locationStatus.KenyaStatus.VOUT147 = VOUT147
-		locationStatus.KenyaStatus.MS147 = MS147
-		locationStatus.KenyaStatus.DA147 = DA147
-		locationStatus.KenyaStatus.EP747 = EP747
+		locationStatus.KenyaStatus.MUL = MUL
+		locationStatus.KenyaStatus.VTRAN = VTRAN
+		locationStatus.KenyaStatus.VOUT = VOUT
+		locationStatus.KenyaStatus.MS = MS
+		locationStatus.KenyaStatus.DA = DA
+		locationStatus.KenyaStatus.INT00001 = INT00001
+		locationStatus.KenyaStatus.INT00003 = INT00003
+		locationStatus.KenyaStatus.INT00007 = INT00007
+		locationStatus.KenyaStatus.SR = SR
+		locationStatus.KenyaStatus.EP = EP
+		locationStatus.KenyaStatus.SPTLSB = SPTLSB
+		locationStatus.KenyaStatus.CGNI = CGNI
+		locationStatus.KenyaStatus.PDF = PDF
+		locationStatus.KenyaStatus.TT140 = TT140
 	case "/mnt/malawi":
-		locationStatus.MalawiStatus.SE147 = SE147
-		locationStatus.MalawiStatus.GL147 = GL147
+		locationStatus.MalawiStatus.SE = SE
+		locationStatus.MalawiStatus.GL = GL
 		locationStatus.MalawiStatus.TXN = TXN
-		locationStatus.MalawiStatus.MUL00004 = MUL00004
-		locationStatus.MalawiStatus.VTRAN147 = VTRAN147
-		locationStatus.MalawiStatus.VOUT147 = VOUT147
-		locationStatus.MalawiStatus.MS147 = MS147
-		locationStatus.MalawiStatus.DA147 = DA147
-		locationStatus.MalawiStatus.EP747 = EP747
+		locationStatus.MalawiStatus.MUL = MUL
+		locationStatus.MalawiStatus.VTRAN = VTRAN
+		locationStatus.MalawiStatus.VOUT = VOUT
+		locationStatus.MalawiStatus.MS = MS
+		locationStatus.MalawiStatus.DA = DA
+		locationStatus.MalawiStatus.INT00001 = INT00001
+		locationStatus.MalawiStatus.INT00003 = INT00003
+		locationStatus.MalawiStatus.INT00007 = INT00007
+		locationStatus.MalawiStatus.SR = SR
+		locationStatus.MalawiStatus.EP = EP
+		locationStatus.MalawiStatus.SPTLSB = SPTLSB
+		locationStatus.MalawiStatus.CGNI = CGNI
+		locationStatus.MalawiStatus.PDF = PDF
+		locationStatus.MalawiStatus.TT140 = TT140
 	case "/mnt/namibia":
-		locationStatus.NamibiaStatus.SE147 = SE147
-		locationStatus.NamibiaStatus.GL147 = GL147
+		locationStatus.NamibiaStatus.SE = SE
+		locationStatus.NamibiaStatus.GL = GL
 		locationStatus.NamibiaStatus.TXN = TXN
-		locationStatus.NamibiaStatus.MUL00004 = MUL00004
-		locationStatus.NamibiaStatus.VTRAN147 = VTRAN147
-		locationStatus.NamibiaStatus.VOUT147 = VOUT147
-		locationStatus.NamibiaStatus.MS147 = MS147
-		locationStatus.NamibiaStatus.DA147 = DA147
+		locationStatus.NamibiaStatus.MUL = MUL
+		locationStatus.NamibiaStatus.VTRAN = VTRAN
+		locationStatus.NamibiaStatus.VOUT = VOUT
+		locationStatus.NamibiaStatus.MS = MS
+		locationStatus.NamibiaStatus.DA = DA
 		locationStatus.NamibiaStatus.INT00001 = INT00001
 		locationStatus.NamibiaStatus.INT00003 = INT00003
 		locationStatus.NamibiaStatus.INT00007 = INT00007
-		locationStatus.NamibiaStatus.SR00001 = SR00001
-		locationStatus.NamibiaStatus.EP747 = EP747
+		locationStatus.NamibiaStatus.SR = SR
+		locationStatus.NamibiaStatus.EP = EP
 		locationStatus.NamibiaStatus.SPTLSB = SPTLSB
 		locationStatus.NamibiaStatus.CGNI = CGNI
+		locationStatus.NamibiaStatus.PDF = PDF
+		locationStatus.NamibiaStatus.TT140 = TT140
 	case "/mnt/uganda":
-		locationStatus.UgandaStatus.SE147 = SE147
-		locationStatus.UgandaStatus.GL147 = GL147
+		locationStatus.UgandaStatus.SE = SE
+		locationStatus.UgandaStatus.GL = GL
 		locationStatus.UgandaStatus.TXN = TXN
-		locationStatus.UgandaStatus.VTRAN147 = VTRAN147
-		locationStatus.UgandaStatus.VOUT147 = VOUT147
-		locationStatus.UgandaStatus.MS147 = MS147
-		locationStatus.UgandaStatus.DA147 = DA147
-		locationStatus.UgandaStatus.EP747 = EP747
+		locationStatus.UgandaStatus.MUL = MUL
+		locationStatus.UgandaStatus.VTRAN = VTRAN
+		locationStatus.UgandaStatus.VOUT = VOUT
+		locationStatus.UgandaStatus.MS = MS
+		locationStatus.UgandaStatus.DA = DA
+		locationStatus.UgandaStatus.INT00001 = INT00001
+		locationStatus.UgandaStatus.INT00003 = INT00003
+		locationStatus.UgandaStatus.INT00007 = INT00007
+		locationStatus.UgandaStatus.SR = SR
+		locationStatus.UgandaStatus.EP = EP
+		locationStatus.UgandaStatus.SPTLSB = SPTLSB
+		locationStatus.UgandaStatus.CGNI = CGNI
 		locationStatus.UgandaStatus.PDF = PDF
 		locationStatus.UgandaStatus.TT140 = TT140
 	case "/mnt/ugandadr":
-		locationStatus.UgandaDRStatus.SE147 = SE147
-		locationStatus.UgandaDRStatus.GL147 = GL147
+		locationStatus.UgandaDRStatus.SE = SE
+		locationStatus.UgandaDRStatus.GL = GL
 		locationStatus.UgandaDRStatus.TXN = TXN
-		locationStatus.UgandaDRStatus.VTRAN147 = VTRAN147
-		locationStatus.UgandaDRStatus.VOUT147 = VOUT147
-		locationStatus.UgandaDRStatus.MS147 = MS147
-		locationStatus.UgandaDRStatus.DA147 = DA147
-		locationStatus.UgandaDRStatus.EP747 = EP747
+		locationStatus.UgandaDRStatus.MUL = MUL
+		locationStatus.UgandaDRStatus.VTRAN = VTRAN
+		locationStatus.UgandaDRStatus.VOUT = VOUT
+		locationStatus.UgandaDRStatus.MS = MS
+		locationStatus.UgandaDRStatus.DA = DA
+		locationStatus.UgandaDRStatus.INT00001 = INT00001
+		locationStatus.UgandaDRStatus.INT00003 = INT00003
+		locationStatus.UgandaDRStatus.INT00007 = INT00007
+		locationStatus.UgandaDRStatus.SR = SR
+		locationStatus.UgandaDRStatus.EP = EP
+		locationStatus.UgandaDRStatus.SPTLSB = SPTLSB
+		locationStatus.UgandaDRStatus.CGNI = CGNI
+		locationStatus.UgandaDRStatus.PDF = PDF
+		locationStatus.UgandaDRStatus.TT140 = TT140
 	case "/mnt/zambia":
-		locationStatus.ZambiaStatus.SE147 = SE147
-		locationStatus.ZambiaStatus.GL147 = GL147
+		locationStatus.ZambiaStatus.SE = SE
+		locationStatus.ZambiaStatus.GL = GL
 		locationStatus.ZambiaStatus.TXN = TXN
-		locationStatus.ZambiaStatus.VTRAN147 = VTRAN147
-		locationStatus.ZambiaStatus.VOUT147 = VOUT147
-		locationStatus.ZambiaStatus.MS147 = MS147
-		locationStatus.ZambiaStatus.DA147 = DA147
-		locationStatus.ZambiaStatus.EP747 = EP747
+		locationStatus.ZambiaStatus.MUL = MUL
+		locationStatus.ZambiaStatus.VTRAN = VTRAN
+		locationStatus.ZambiaStatus.VOUT = VOUT
+		locationStatus.ZambiaStatus.MS = MS
+		locationStatus.ZambiaStatus.DA = DA
+		locationStatus.ZambiaStatus.INT00001 = INT00001
+		locationStatus.ZambiaStatus.INT00003 = INT00003
+		locationStatus.ZambiaStatus.INT00007 = INT00007
+		locationStatus.ZambiaStatus.SR = SR
+		locationStatus.ZambiaStatus.EP = EP
+		locationStatus.ZambiaStatus.SPTLSB = SPTLSB
+		locationStatus.ZambiaStatus.CGNI = CGNI
+		locationStatus.ZambiaStatus.PDF = PDF
+		locationStatus.ZambiaStatus.TT140 = TT140
 	case "/mnt/zambiadr":
-		locationStatus.ZambiaDRStatus.SE147 = SE147
-		locationStatus.ZambiaDRStatus.GL147 = GL147
+		locationStatus.ZambiaDRStatus.SE = SE
+		locationStatus.ZambiaDRStatus.GL = GL
 		locationStatus.ZambiaDRStatus.TXN = TXN
-		locationStatus.ZambiaDRStatus.VTRAN147 = VTRAN147
-		locationStatus.ZambiaDRStatus.VOUT147 = VOUT147
-		locationStatus.ZambiaDRStatus.MS147 = MS147
-		locationStatus.ZambiaDRStatus.DA147 = DA147
-		locationStatus.ZambiaDRStatus.EP747 = EP747
+		locationStatus.ZambiaDRStatus.MUL = MUL
+		locationStatus.ZambiaDRStatus.VTRAN = VTRAN
+		locationStatus.ZambiaDRStatus.VOUT = VOUT
+		locationStatus.ZambiaDRStatus.MS = MS
+		locationStatus.ZambiaDRStatus.DA = DA
+		locationStatus.ZambiaDRStatus.INT00001 = INT00001
+		locationStatus.ZambiaDRStatus.INT00003 = INT00003
+		locationStatus.ZambiaDRStatus.INT00007 = INT00007
+		locationStatus.ZambiaDRStatus.SR = SR
+		locationStatus.ZambiaDRStatus.EP = EP
+		locationStatus.ZambiaDRStatus.SPTLSB = SPTLSB
+		locationStatus.ZambiaDRStatus.CGNI = CGNI
+		locationStatus.ZambiaDRStatus.PDF = PDF
+		locationStatus.ZambiaDRStatus.TT140 = TT140
 	case "/mnt/zambiaprod":
-		locationStatus.ZambiaProdStatus.SE147 = SE147
-		locationStatus.ZambiaProdStatus.GL147 = GL147
+		locationStatus.ZambiaProdStatus.SE = SE
+		locationStatus.ZambiaProdStatus.GL = GL
 		locationStatus.ZambiaProdStatus.TXN = TXN
-		locationStatus.ZambiaProdStatus.VTRAN147 = VTRAN147
-		locationStatus.ZambiaProdStatus.VOUT147 = VOUT147
-		locationStatus.ZambiaProdStatus.MS147 = MS147
-		locationStatus.ZambiaProdStatus.DA147 = DA147
-		locationStatus.ZambiaProdStatus.EP747 = EP747
+		locationStatus.ZambiaProdStatus.MUL = MUL
+		locationStatus.ZambiaProdStatus.VTRAN = VTRAN
+		locationStatus.ZambiaProdStatus.VOUT = VOUT
+		locationStatus.ZambiaProdStatus.MS = MS
+		locationStatus.ZambiaProdStatus.DA = DA
+		locationStatus.ZambiaProdStatus.INT00001 = INT00001
+		locationStatus.ZambiaProdStatus.INT00003 = INT00003
+		locationStatus.ZambiaProdStatus.INT00007 = INT00007
+		locationStatus.ZambiaProdStatus.SR = SR
+		locationStatus.ZambiaProdStatus.EP = EP
+		locationStatus.ZambiaProdStatus.SPTLSB = SPTLSB
+		locationStatus.ZambiaProdStatus.CGNI = CGNI
+		locationStatus.ZambiaProdStatus.PDF = PDF
+		locationStatus.ZambiaProdStatus.TT140 = TT140
 
 	}
 	return nil
@@ -340,182 +418,57 @@ func (s *service) CreateJSONResponse() LocationStatus {
 	return locationStatus
 }
 
-func (s *service) resetStatus() {
-	locationStatus = LocationStatus{}
-}
-
 func (s *service) ConfirmZimbabweFileAvailability() {
-	err := try.Do(func(attempt int) (bool, error) {
-		try.MaxRetries = 240
-		var err error
-		err = s.ConfirmFileAvailabilityMethod("/mnt/zimbabwe")
-		if err != nil {
-			log.Println("Zimbabwe file not yet detected. Next attempt in 2 minutes...")
-			time.Sleep(2 * time.Minute) // wait 2 minutes
-		}
-		return true, err
-	})
-	if err != nil {
-		log.Println(err)
-	}
+	
+	s.ConfirmFileAvailabilityMethod("/mnt/zimbabwe")
 }
 
 func (s *service) ConfirmBotswanaFileAvailability() {
-	err := try.Do(func(attempt int) (bool, error) {
-		try.MaxRetries = 240
-		var err error
-		err = s.ConfirmFileAvailabilityMethod("/mnt/botswana")
-		if err != nil {
-			log.Println("Botswana file not yet detected. Next attempt in 2 minutes...")
-			time.Sleep(2 * time.Minute) // wait 2 minutes
-		}
-		return true, err
-	})
-	if err != nil {
-		log.Println(err)
-	}
+
+	s.ConfirmFileAvailabilityMethod("/mnt/botswana")
 }
 
 func (s *service) ConfirmGhanaFileAvailability() {
-	err := try.Do(func(attempt int) (bool, error) {
-		try.MaxRetries = 240
-		var err error
-		err = s.ConfirmFileAvailabilityMethod("/mnt/ghana")
-		if err != nil {
-			log.Println("Ghana file not yet detected. Next attempt in 2 minutes...")
-			time.Sleep(2 * time.Minute) // wait 2 minutes
-		}
-		return true, err
-	})
-	if err != nil {
-		log.Println(err)
-	}
+
+	s.ConfirmFileAvailabilityMethod("/mnt/ghana")
 }
 
 func (s *service) ConfirmKenyaFileAvailability() {
-	err := try.Do(func(attempt int) (bool, error) {
-		try.MaxRetries = 240
-		var err error
-		err = s.ConfirmFileAvailabilityMethod("/mnt/kenya")
-		if err != nil {
-			log.Println("Kenya file not yet detected. Next attempt in 2 minutes...")
-			time.Sleep(2 * time.Minute) // wait 2 minutes
-		}
-		return true, err
-	})
-	if err != nil {
-		log.Println(err)
-	}
+
+	s.ConfirmFileAvailabilityMethod("/mnt/kenya")
 }
 
 func (s *service) ConfirmMalawiFileAvailability() {
-	err := try.Do(func(attempt int) (bool, error) {
-		try.MaxRetries = 240
-		var err error
-		err = s.ConfirmFileAvailabilityMethod("/mnt/malawi")
-		if err != nil {
-			log.Println("Malawi file not yet detected. Next attempt in 2 minutes...")
-			time.Sleep(2 * time.Minute) // wait 2 minutes
-		}
-		return true, err
-	})
-	if err != nil {
-		log.Println(err)
-	}
+
+	s.ConfirmFileAvailabilityMethod("/mnt/malawi")
 }
 
 func (s *service) ConfirmNamibiaFileAvailability() {
-	err := try.Do(func(attempt int) (bool, error) {
-		try.MaxRetries = 240
-		var err error
-		err = s.ConfirmFileAvailabilityMethod("/mnt/namibia")
-		if err != nil {
-			log.Println("Namibia file not yet detected. Next attempt in 2 minutes...")
-			time.Sleep(2 * time.Minute) // wait 2 minutes
-		}
-		return true, err
-	})
-	if err != nil {
-		log.Println(err)
-	}
+
+	s.ConfirmFileAvailabilityMethod("/mnt/namibia")
 }
 
 func (s *service) ConfirmUgandaFileAvailability() {
-	err := try.Do(func(attempt int) (bool, error) {
-		try.MaxRetries = 240
-		var err error
-		err = s.ConfirmFileAvailabilityMethod("/mnt/uganda")
-		if err != nil {
-			log.Println("Uganda file not yet detected. Next attempt in 2 minutes...")
-			time.Sleep(2 * time.Minute) // wait 2 minutes
-		}
-		return true, err
-	})
-	if err != nil {
-		log.Println(err)
-	}
+
+	s.ConfirmFileAvailabilityMethod("/mnt/uganda")
 }
 
 func (s *service) ConfirmUgandaDRFileAvailability() {
-	err := try.Do(func(attempt int) (bool, error) {
-		try.MaxRetries = 240
-		var err error
-		err = s.ConfirmFileAvailabilityMethod("/mnt/ugandadr")
-		if err != nil {
-			log.Println("UgandaDR file not yet detected. Next attempt in 2 minutes...")
-			time.Sleep(2 * time.Minute) // wait 2 minutes
-		}
-		return true, err
-	})
-	if err != nil {
-		log.Println(err)
-	}
+
+	s.ConfirmFileAvailabilityMethod("/mnt/ugandadr")
 }
 
 func (s *service) ConfirmZambiaFileAvailability() {
-	err := try.Do(func(attempt int) (bool, error) {
-		try.MaxRetries = 240
-		var err error
-		err = s.ConfirmFileAvailabilityMethod("/mnt/zambia")
-		if err != nil {
-			log.Println("Zambia file not yet detected. Next attempt in 2 minutes...")
-			time.Sleep(2 * time.Minute) // wait 2 minutes
-		}
-		return true, err
-	})
-	if err != nil {
-		log.Println(err)
-	}
+
+	s.ConfirmFileAvailabilityMethod("/mnt/zambia")
 }
 
 func (s *service) ConfirmZambiaDRFileAvailability() {
-	err := try.Do(func(attempt int) (bool, error) {
-		try.MaxRetries = 240
-		var err error
-		err = s.ConfirmFileAvailabilityMethod("/mnt/zambiadr")
-		if err != nil {
-			log.Println("ZambiaDR file not yet detected. Next attempt in 2 minutes...")
-			time.Sleep(2 * time.Minute) // wait 2 minutes
-		}
-		return true, err
-	})
-	if err != nil {
-		log.Println(err)
-	}
+
+	s.ConfirmFileAvailabilityMethod("/mnt/zambiadr")
 }
 
 func (s *service) ConfirmZambiaProdFileAvailability() {
-	err := try.Do(func(attempt int) (bool, error) {
-		try.MaxRetries = 240
-		var err error
-		err = s.ConfirmFileAvailabilityMethod("/mnt/zambiaprod")
-		if err != nil {
-			log.Println("ZambiaProd file not yet detected. Next attempt in 2 minutes...")
-			time.Sleep(2 * time.Minute) // wait 2 minutes
-		}
-		return true, err
-	})
-	if err != nil {
-		log.Println(err)
-	}
+
+	s.ConfirmFileAvailabilityMethod("/mnt/zambiaprod")
 }
