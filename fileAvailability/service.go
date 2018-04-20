@@ -42,7 +42,7 @@ type FilesReceived struct {
 	TXN      bool
 	DA       bool
 	MS       bool
-	EP    bool
+	EP       bool
 	VTRAN    bool
 	VOUT     bool
 	SPTLSB   bool
@@ -50,8 +50,22 @@ type FilesReceived struct {
 	INT00001 bool
 	INT00003 bool
 	INT00007 bool
-	PDF      int
 	TT140    int
+	// PDFs
+	VOMTR    bool
+	VIFSR    bool
+	TIL      bool
+	VIMTR    bool
+	VOFSR    bool
+	MIMTR    bool
+	MOMTR    bool
+	RR       bool
+	MRT      bool
+	MOFSR    bool
+	MAR      bool
+	MIFSR    bool
+	DOMTR    bool
+	DTIL     bool
 }
 
 var locationStatus LocationStatus
@@ -123,7 +137,7 @@ func (s *service) schedule() {
 		<-confirmZambiaDRAvailability.Start()
 	}()
 	go func() {
-		confirmZambiaProdAvailability.Every(1).Day().At("00:00").Do(s.ConfirmZambiaProdFileAvailability)
+		confirmZambiaProdAvailability.Every(1).Minute().Do(s.ConfirmZambiaProdFileAvailability)
 		<-confirmZambiaProdAvailability.Start()
 	}()
 	go func() {
@@ -205,9 +219,22 @@ func (s *service) ConfirmFileAvailabilityMethod(path string) error {
 	INT00001, _ := s.pathToMostRecentFile(path, "INT00001")
 	INT00003, _ := s.pathToMostRecentFile(path, "INT00003")
 	INT00007, _ := s.pathToMostRecentFile(path, "INT00007")
-
-	PDF := s.fileCount(path, "PDF")
 	TT140 := s.fileCount(path, "TT140")
+	// PDFs
+	VOMTR, _ := s.pathToMostRecentFile(path, "VISA_OUTGOING_MONET_TRANS_REPORT")
+	VIFSR, _ := s.pathToMostRecentFile(path, "VISA_INCOMING_FILES_SUMMARY_REPORT")
+	TIL, _ := s.pathToMostRecentFile(path, "TRANS_INPUT_LIST_")
+	VIMTR, _ := s.pathToMostRecentFile(path, "VISA_INCOMING_MONET_TRANS_REPORT")
+	VOFSR, _ := s.pathToMostRecentFile(path, "VISA_OUTGOING_FILES_SUMMARY_REPORT")
+	MIMTR, _ := s.pathToMostRecentFile(path, "MC_INCOMING_MONET_TRANS_REPORT")
+	MOMTR, _ := s.pathToMostRecentFile(path, "MC_OUTGOING_MONET_TRANS_REPORT")
+	RR, _ := s.pathToMostRecentFile(path, "RECON_REPORT")
+	MRT, _ := s.pathToMostRecentFile(path, "MERCH_REJ_TRANS")
+	MOFSR, _ := s.pathToMostRecentFile(path, "MC_OUTGOING_FILES_SUMMARY_REPORT")
+	MAR, _ := s.pathToMostRecentFile(path, "MASTERCARD_ACKNOWLEDGEMENT_REPORT")
+	MIFSR, _ := s.pathToMostRecentFile(path, "MC_INCOMING_FILES_SUMMARY_REPORT")
+	DOMTR, _ := s.pathToMostRecentFile(path, "DCI_OUTGOING_MONET_TRANS_REPORT")
+	DTIL, _ := s.pathToMostRecentFile(path, "DCI_TRANS_INPUT_LIST")
 
 	switch path {
 	case "/mnt/zimbabwe":
@@ -226,8 +253,21 @@ func (s *service) ConfirmFileAvailabilityMethod(path string) error {
 		locationStatus.ZimbabweStatus.EP = EP
 		locationStatus.ZimbabweStatus.SPTLSB = SPTLSB
 		locationStatus.ZimbabweStatus.CGNI = CGNI
-		locationStatus.ZimbabweStatus.PDF = PDF
 		locationStatus.ZimbabweStatus.TT140 = TT140
+		locationStatus.ZimbabweStatus.VOMTR = VOMTR
+		locationStatus.ZimbabweStatus.VIFSR = VIFSR
+		locationStatus.ZimbabweStatus.TIL = TIL
+		locationStatus.ZimbabweStatus.VIMTR = VIMTR
+		locationStatus.ZimbabweStatus.VOFSR = VOFSR
+		locationStatus.ZimbabweStatus.MIMTR = MIMTR
+		locationStatus.ZimbabweStatus.MOMTR = MOMTR
+		locationStatus.ZimbabweStatus.RR = RR
+		locationStatus.ZimbabweStatus.MRT = MRT
+		locationStatus.ZimbabweStatus.MOFSR = MOFSR
+		locationStatus.ZimbabweStatus.MAR = MAR
+		locationStatus.ZimbabweStatus.MIFSR = MIFSR
+		locationStatus.ZimbabweStatus.DOMTR = DOMTR
+		locationStatus.ZimbabweStatus.DTIL = DTIL
 	case "/mnt/botswana":
 		locationStatus.BotswanaStatus.SE = SE
 		locationStatus.BotswanaStatus.GL = GL
@@ -244,8 +284,21 @@ func (s *service) ConfirmFileAvailabilityMethod(path string) error {
 		locationStatus.BotswanaStatus.EP = EP
 		locationStatus.BotswanaStatus.SPTLSB = SPTLSB
 		locationStatus.BotswanaStatus.CGNI = CGNI
-		locationStatus.BotswanaStatus.PDF = PDF
 		locationStatus.BotswanaStatus.TT140 = TT140
+		locationStatus.ZimbabweStatus.VOMTR = VOMTR
+		locationStatus.ZimbabweStatus.VIFSR = VIFSR
+		locationStatus.ZimbabweStatus.TIL = TIL
+		locationStatus.ZimbabweStatus.VIMTR = VIMTR
+		locationStatus.ZimbabweStatus.VOFSR = VOFSR
+		locationStatus.ZimbabweStatus.MIMTR = MIMTR
+		locationStatus.ZimbabweStatus.MOMTR = MOMTR
+		locationStatus.ZimbabweStatus.RR = RR
+		locationStatus.ZimbabweStatus.MRT = MRT
+		locationStatus.ZimbabweStatus.MOFSR = MOFSR
+		locationStatus.ZimbabweStatus.MAR = MAR
+		locationStatus.ZimbabweStatus.MIFSR = MIFSR
+		locationStatus.ZimbabweStatus.DOMTR = DOMTR
+		locationStatus.ZimbabweStatus.DTIL = DTIL
 	case "/mnt/ghana":
 		locationStatus.GhanaStatus.SE = SE
 		locationStatus.GhanaStatus.GL = GL
@@ -262,8 +315,21 @@ func (s *service) ConfirmFileAvailabilityMethod(path string) error {
 		locationStatus.GhanaStatus.EP = EP
 		locationStatus.GhanaStatus.SPTLSB = SPTLSB
 		locationStatus.GhanaStatus.CGNI = CGNI
-		locationStatus.GhanaStatus.PDF = PDF
 		locationStatus.GhanaStatus.TT140 = TT140
+		locationStatus.ZimbabweStatus.VOMTR = VOMTR
+		locationStatus.ZimbabweStatus.VIFSR = VIFSR
+		locationStatus.ZimbabweStatus.TIL = TIL
+		locationStatus.ZimbabweStatus.VIMTR = VIMTR
+		locationStatus.ZimbabweStatus.VOFSR = VOFSR
+		locationStatus.ZimbabweStatus.MIMTR = MIMTR
+		locationStatus.ZimbabweStatus.MOMTR = MOMTR
+		locationStatus.ZimbabweStatus.RR = RR
+		locationStatus.ZimbabweStatus.MRT = MRT
+		locationStatus.ZimbabweStatus.MOFSR = MOFSR
+		locationStatus.ZimbabweStatus.MAR = MAR
+		locationStatus.ZimbabweStatus.MIFSR = MIFSR
+		locationStatus.ZimbabweStatus.DOMTR = DOMTR
+		locationStatus.ZimbabweStatus.DTIL = DTIL
 	case "/mnt/kenya":
 		locationStatus.KenyaStatus.SE = SE
 		locationStatus.KenyaStatus.GL = GL
@@ -280,8 +346,21 @@ func (s *service) ConfirmFileAvailabilityMethod(path string) error {
 		locationStatus.KenyaStatus.EP = EP
 		locationStatus.KenyaStatus.SPTLSB = SPTLSB
 		locationStatus.KenyaStatus.CGNI = CGNI
-		locationStatus.KenyaStatus.PDF = PDF
 		locationStatus.KenyaStatus.TT140 = TT140
+		locationStatus.ZimbabweStatus.VOMTR = VOMTR
+		locationStatus.ZimbabweStatus.VIFSR = VIFSR
+		locationStatus.ZimbabweStatus.TIL = TIL
+		locationStatus.ZimbabweStatus.VIMTR = VIMTR
+		locationStatus.ZimbabweStatus.VOFSR = VOFSR
+		locationStatus.ZimbabweStatus.MIMTR = MIMTR
+		locationStatus.ZimbabweStatus.MOMTR = MOMTR
+		locationStatus.ZimbabweStatus.RR = RR
+		locationStatus.ZimbabweStatus.MRT = MRT
+		locationStatus.ZimbabweStatus.MOFSR = MOFSR
+		locationStatus.ZimbabweStatus.MAR = MAR
+		locationStatus.ZimbabweStatus.MIFSR = MIFSR
+		locationStatus.ZimbabweStatus.DOMTR = DOMTR
+		locationStatus.ZimbabweStatus.DTIL = DTIL
 	case "/mnt/malawi":
 		locationStatus.MalawiStatus.SE = SE
 		locationStatus.MalawiStatus.GL = GL
@@ -298,8 +377,21 @@ func (s *service) ConfirmFileAvailabilityMethod(path string) error {
 		locationStatus.MalawiStatus.EP = EP
 		locationStatus.MalawiStatus.SPTLSB = SPTLSB
 		locationStatus.MalawiStatus.CGNI = CGNI
-		locationStatus.MalawiStatus.PDF = PDF
 		locationStatus.MalawiStatus.TT140 = TT140
+		locationStatus.ZimbabweStatus.VOMTR = VOMTR
+		locationStatus.ZimbabweStatus.VIFSR = VIFSR
+		locationStatus.ZimbabweStatus.TIL = TIL
+		locationStatus.ZimbabweStatus.VIMTR = VIMTR
+		locationStatus.ZimbabweStatus.VOFSR = VOFSR
+		locationStatus.ZimbabweStatus.MIMTR = MIMTR
+		locationStatus.ZimbabweStatus.MOMTR = MOMTR
+		locationStatus.ZimbabweStatus.RR = RR
+		locationStatus.ZimbabweStatus.MRT = MRT
+		locationStatus.ZimbabweStatus.MOFSR = MOFSR
+		locationStatus.ZimbabweStatus.MAR = MAR
+		locationStatus.ZimbabweStatus.MIFSR = MIFSR
+		locationStatus.ZimbabweStatus.DOMTR = DOMTR
+		locationStatus.ZimbabweStatus.DTIL = DTIL
 	case "/mnt/namibia":
 		locationStatus.NamibiaStatus.SE = SE
 		locationStatus.NamibiaStatus.GL = GL
@@ -316,8 +408,21 @@ func (s *service) ConfirmFileAvailabilityMethod(path string) error {
 		locationStatus.NamibiaStatus.EP = EP
 		locationStatus.NamibiaStatus.SPTLSB = SPTLSB
 		locationStatus.NamibiaStatus.CGNI = CGNI
-		locationStatus.NamibiaStatus.PDF = PDF
 		locationStatus.NamibiaStatus.TT140 = TT140
+		locationStatus.ZimbabweStatus.VOMTR = VOMTR
+		locationStatus.ZimbabweStatus.VIFSR = VIFSR
+		locationStatus.ZimbabweStatus.TIL = TIL
+		locationStatus.ZimbabweStatus.VIMTR = VIMTR
+		locationStatus.ZimbabweStatus.VOFSR = VOFSR
+		locationStatus.ZimbabweStatus.MIMTR = MIMTR
+		locationStatus.ZimbabweStatus.MOMTR = MOMTR
+		locationStatus.ZimbabweStatus.RR = RR
+		locationStatus.ZimbabweStatus.MRT = MRT
+		locationStatus.ZimbabweStatus.MOFSR = MOFSR
+		locationStatus.ZimbabweStatus.MAR = MAR
+		locationStatus.ZimbabweStatus.MIFSR = MIFSR
+		locationStatus.ZimbabweStatus.DOMTR = DOMTR
+		locationStatus.ZimbabweStatus.DTIL = DTIL
 	case "/mnt/uganda":
 		locationStatus.UgandaStatus.SE = SE
 		locationStatus.UgandaStatus.GL = GL
@@ -334,8 +439,21 @@ func (s *service) ConfirmFileAvailabilityMethod(path string) error {
 		locationStatus.UgandaStatus.EP = EP
 		locationStatus.UgandaStatus.SPTLSB = SPTLSB
 		locationStatus.UgandaStatus.CGNI = CGNI
-		locationStatus.UgandaStatus.PDF = PDF
 		locationStatus.UgandaStatus.TT140 = TT140
+		locationStatus.ZimbabweStatus.VOMTR = VOMTR
+		locationStatus.ZimbabweStatus.VIFSR = VIFSR
+		locationStatus.ZimbabweStatus.TIL = TIL
+		locationStatus.ZimbabweStatus.VIMTR = VIMTR
+		locationStatus.ZimbabweStatus.VOFSR = VOFSR
+		locationStatus.ZimbabweStatus.MIMTR = MIMTR
+		locationStatus.ZimbabweStatus.MOMTR = MOMTR
+		locationStatus.ZimbabweStatus.RR = RR
+		locationStatus.ZimbabweStatus.MRT = MRT
+		locationStatus.ZimbabweStatus.MOFSR = MOFSR
+		locationStatus.ZimbabweStatus.MAR = MAR
+		locationStatus.ZimbabweStatus.MIFSR = MIFSR
+		locationStatus.ZimbabweStatus.DOMTR = DOMTR
+		locationStatus.ZimbabweStatus.DTIL = DTIL
 	case "/mnt/ugandadr":
 		locationStatus.UgandaDRStatus.SE = SE
 		locationStatus.UgandaDRStatus.GL = GL
@@ -352,8 +470,21 @@ func (s *service) ConfirmFileAvailabilityMethod(path string) error {
 		locationStatus.UgandaDRStatus.EP = EP
 		locationStatus.UgandaDRStatus.SPTLSB = SPTLSB
 		locationStatus.UgandaDRStatus.CGNI = CGNI
-		locationStatus.UgandaDRStatus.PDF = PDF
 		locationStatus.UgandaDRStatus.TT140 = TT140
+		locationStatus.ZimbabweStatus.VOMTR = VOMTR
+		locationStatus.ZimbabweStatus.VIFSR = VIFSR
+		locationStatus.ZimbabweStatus.TIL = TIL
+		locationStatus.ZimbabweStatus.VIMTR = VIMTR
+		locationStatus.ZimbabweStatus.VOFSR = VOFSR
+		locationStatus.ZimbabweStatus.MIMTR = MIMTR
+		locationStatus.ZimbabweStatus.MOMTR = MOMTR
+		locationStatus.ZimbabweStatus.RR = RR
+		locationStatus.ZimbabweStatus.MRT = MRT
+		locationStatus.ZimbabweStatus.MOFSR = MOFSR
+		locationStatus.ZimbabweStatus.MAR = MAR
+		locationStatus.ZimbabweStatus.MIFSR = MIFSR
+		locationStatus.ZimbabweStatus.DOMTR = DOMTR
+		locationStatus.ZimbabweStatus.DTIL = DTIL
 	case "/mnt/zambia":
 		locationStatus.ZambiaStatus.SE = SE
 		locationStatus.ZambiaStatus.GL = GL
@@ -370,8 +501,21 @@ func (s *service) ConfirmFileAvailabilityMethod(path string) error {
 		locationStatus.ZambiaStatus.EP = EP
 		locationStatus.ZambiaStatus.SPTLSB = SPTLSB
 		locationStatus.ZambiaStatus.CGNI = CGNI
-		locationStatus.ZambiaStatus.PDF = PDF
 		locationStatus.ZambiaStatus.TT140 = TT140
+		locationStatus.ZimbabweStatus.VOMTR = VOMTR
+		locationStatus.ZimbabweStatus.VIFSR = VIFSR
+		locationStatus.ZimbabweStatus.TIL = TIL
+		locationStatus.ZimbabweStatus.VIMTR = VIMTR
+		locationStatus.ZimbabweStatus.VOFSR = VOFSR
+		locationStatus.ZimbabweStatus.MIMTR = MIMTR
+		locationStatus.ZimbabweStatus.MOMTR = MOMTR
+		locationStatus.ZimbabweStatus.RR = RR
+		locationStatus.ZimbabweStatus.MRT = MRT
+		locationStatus.ZimbabweStatus.MOFSR = MOFSR
+		locationStatus.ZimbabweStatus.MAR = MAR
+		locationStatus.ZimbabweStatus.MIFSR = MIFSR
+		locationStatus.ZimbabweStatus.DOMTR = DOMTR
+		locationStatus.ZimbabweStatus.DTIL = DTIL
 	case "/mnt/zambiadr":
 		locationStatus.ZambiaDRStatus.SE = SE
 		locationStatus.ZambiaDRStatus.GL = GL
@@ -388,8 +532,21 @@ func (s *service) ConfirmFileAvailabilityMethod(path string) error {
 		locationStatus.ZambiaDRStatus.EP = EP
 		locationStatus.ZambiaDRStatus.SPTLSB = SPTLSB
 		locationStatus.ZambiaDRStatus.CGNI = CGNI
-		locationStatus.ZambiaDRStatus.PDF = PDF
 		locationStatus.ZambiaDRStatus.TT140 = TT140
+		locationStatus.ZimbabweStatus.VOMTR = VOMTR
+		locationStatus.ZimbabweStatus.VIFSR = VIFSR
+		locationStatus.ZimbabweStatus.TIL = TIL
+		locationStatus.ZimbabweStatus.VIMTR = VIMTR
+		locationStatus.ZimbabweStatus.VOFSR = VOFSR
+		locationStatus.ZimbabweStatus.MIMTR = MIMTR
+		locationStatus.ZimbabweStatus.MOMTR = MOMTR
+		locationStatus.ZimbabweStatus.RR = RR
+		locationStatus.ZimbabweStatus.MRT = MRT
+		locationStatus.ZimbabweStatus.MOFSR = MOFSR
+		locationStatus.ZimbabweStatus.MAR = MAR
+		locationStatus.ZimbabweStatus.MIFSR = MIFSR
+		locationStatus.ZimbabweStatus.DOMTR = DOMTR
+		locationStatus.ZimbabweStatus.DTIL = DTIL
 	case "/mnt/zambiaprod":
 		locationStatus.ZambiaProdStatus.SE = SE
 		locationStatus.ZambiaProdStatus.GL = GL
@@ -406,8 +563,21 @@ func (s *service) ConfirmFileAvailabilityMethod(path string) error {
 		locationStatus.ZambiaProdStatus.EP = EP
 		locationStatus.ZambiaProdStatus.SPTLSB = SPTLSB
 		locationStatus.ZambiaProdStatus.CGNI = CGNI
-		locationStatus.ZambiaProdStatus.PDF = PDF
 		locationStatus.ZambiaProdStatus.TT140 = TT140
+		locationStatus.ZimbabweStatus.VOMTR = VOMTR
+		locationStatus.ZimbabweStatus.VIFSR = VIFSR
+		locationStatus.ZimbabweStatus.TIL = TIL
+		locationStatus.ZimbabweStatus.VIMTR = VIMTR
+		locationStatus.ZimbabweStatus.VOFSR = VOFSR
+		locationStatus.ZimbabweStatus.MIMTR = MIMTR
+		locationStatus.ZimbabweStatus.MOMTR = MOMTR
+		locationStatus.ZimbabweStatus.RR = RR
+		locationStatus.ZimbabweStatus.MRT = MRT
+		locationStatus.ZimbabweStatus.MOFSR = MOFSR
+		locationStatus.ZimbabweStatus.MAR = MAR
+		locationStatus.ZimbabweStatus.MIFSR = MIFSR
+		locationStatus.ZimbabweStatus.DOMTR = DOMTR
+		locationStatus.ZimbabweStatus.DTIL = DTIL
 
 	}
 	return nil
@@ -419,7 +589,7 @@ func (s *service) CreateJSONResponse() LocationStatus {
 }
 
 func (s *service) ConfirmZimbabweFileAvailability() {
-	
+
 	s.ConfirmFileAvailabilityMethod("/mnt/zimbabwe")
 }
 
