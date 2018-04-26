@@ -1,14 +1,15 @@
-package fileAvailability
+package monitor
+
 
 import (
-	"context"
 	"github.com/go-kit/kit/endpoint"
+	"context"
 )
 
 func makeStatusRequestEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 
-		status := s.CreateJSONResponse()
+		status := s
 
 		return status, nil
 	}
