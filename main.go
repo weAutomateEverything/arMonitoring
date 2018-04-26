@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/weAutomateEverything/fileMonitorService/monitor"
+	"github.com/weAutomateEverything/arMonitoring/monitor"
 	"os/signal"
 	"syscall"
 )
