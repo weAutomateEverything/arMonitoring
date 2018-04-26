@@ -1,5 +1,4 @@
-package fileAvailability
-
+package monitor
 import (
 	kitlog "github.com/go-kit/kit/log"
 	kithttp "github.com/go-kit/kit/transport/http"

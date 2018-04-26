@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/weAutomateEverything/arMonitoring/fileAvailability"
+	"github.com/weAutomateEverything/fileMonitorService/monitor"
 	"os/signal"
 	"syscall"
 )
@@ -24,26 +24,26 @@ func main() {
 
 	fieldKeys := []string{"method"}
 
-	fa := fileAvailability.NewService()
-	fa = fileAvailability.NewLoggingService(log.With(logger, "component", "fileAvailability"), fa)
-	fa = fileAvailability.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
+	mon := monitor.NewService()
+	mon = monitor.NewLoggingService(log.With(logger, "component", "fileAvailability"), mon)
+	mon = monitor.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace: "api",
-		Subsystem: "fileAvailability",
+		Subsystem: "monitor",
 		Name:      "request_count",
 		Help:      "Number of requests received.",
 	}, fieldKeys),
 		kitprometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
 			Namespace: "api",
-			Subsystem: "fileAvailability",
+			Subsystem: "monitor",
 			Name:      "request_latency_microseconds",
 			Help:      "Total duration of requests in microseconds.",
-		}, fieldKeys), fa)
+		}, fieldKeys), mon)
 
 	httpLogger := log.With(logger, "component", "http")
 
 	mux := http.NewServeMux()
 
-	mux.Handle("/fileStatus", fileAvailability.MakeHandler(fa, httpLogger, nil))
+	mux.Handle("/fileStatus", monitor.MakeHandler(mon, httpLogger, nil))
 	
 	http.Handle("/", accessControl(mux))
 	http.Handle("/metrics", promhttp.Handler())
