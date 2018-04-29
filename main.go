@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/weAutomateEverything/arMonitoring/monitor"
+	"github.com/weAutomateEverything/fileMonitorService/monitor"
 	"os/signal"
 	"syscall"
 )
@@ -28,13 +28,13 @@ func main() {
 	mon = monitor.NewLoggingService(log.With(logger, "component", "fileAvailability"), mon)
 	mon = monitor.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace: "api",
-		Subsystem: "monitor",
+		Subsystem: "fileChecker",
 		Name:      "request_count",
 		Help:      "Number of requests received.",
 	}, fieldKeys),
 		kitprometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
 			Namespace: "api",
-			Subsystem: "monitor",
+			Subsystem: "fileChecker",
 			Name:      "request_latency_microseconds",
 			Help:      "Total duration of requests in microseconds.",
 		}, fieldKeys), mon)
@@ -44,7 +44,7 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.Handle("/fileStatus", monitor.MakeHandler(mon, httpLogger, nil))
-	
+
 	http.Handle("/", accessControl(mux))
 	http.Handle("/metrics", promhttp.Handler())
 
