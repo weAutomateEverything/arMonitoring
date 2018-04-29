@@ -1,29 +1,28 @@
 package fileChecker
 
 import (
-	"log"
 	"fmt"
-	"time"
-	"strings"
-	"os"
 	"github.com/jasonlvhit/gocron"
+	"log"
+	"os"
+	"strings"
+	"time"
 )
 
 type Service interface {
 }
 
 type service struct {
-	mountPath string
+	mountPath  string
 	fileStatus map[string]bool
 }
 
 func NewFileChecker(mountpath string, files ...string) Service {
 
-	s :=  &service{
-		mountPath:mountpath,
+	s := &service{
+		mountPath:  mountpath,
 		fileStatus: make(map[string]bool),
 	}
-	
 
 	for _, x := range files {
 		s.fileStatus[x] = false
@@ -37,16 +36,15 @@ func NewFileChecker(mountpath string, files ...string) Service {
 	return s
 }
 
-
 func (s *service) ConfirmFileAvailabilityMethod() {
 
 	for key := range s.fileStatus {
-		s.fileStatus[key] = s.pathToMostRecentFile(s.mountPath,key)
+		s.fileStatus[key] = s.pathToMostRecentFile(s.mountPath, key)
 	}
 
 }
 
-func (s *service) pathToMostRecentFile(dirPath, fileContains string) (bool) {
+func (s *service) pathToMostRecentFile(dirPath, fileContains string) bool {
 
 	fileList, err := s.GetFilesInPath(dirPath)
 	if err != nil || len(fileList) == 0 {
@@ -79,4 +77,3 @@ func (s *service) GetFilesInPath(path string) ([]string, error) {
 
 	return list, nil
 }
-

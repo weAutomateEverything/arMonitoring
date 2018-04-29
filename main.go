@@ -9,10 +9,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 	"os"
-	
+
+	"github.com/weAutomateEverything/fileMonitorService/monitor"
 	"os/signal"
 	"syscall"
-	"github.com/weAutomateEverything/fileMonitorService/monitor"
 )
 
 func main() {
@@ -44,7 +44,7 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.Handle("/fileStatus", monitor.MakeHandler(mon, httpLogger, nil))
-	
+
 	http.Handle("/", accessControl(mux))
 	http.Handle("/metrics", promhttp.Handler())
 
