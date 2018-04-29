@@ -21,7 +21,9 @@ func NewFileChecker(mountpath string, files ...string) Service {
 
 	s :=  &service{
 		mountPath:mountpath,
+		fileStatus: make(map[string]bool),
 	}
+	
 
 	for _, x := range files {
 		s.fileStatus[x] = false

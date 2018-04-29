@@ -1,4 +1,4 @@
-package fileAvailability
+package monitor
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 func makeStatusRequestEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 
-		status := s.CreateJSONResponse()
+		status := "poop"
 
 		return status, nil
 	}
