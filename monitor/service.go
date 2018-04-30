@@ -5,7 +5,7 @@ import (
 )
 
 type Service interface {
-	StatusResults() *service
+	StatusResults() []fileChecker.Service
 }
 
 type service struct {
@@ -40,7 +40,7 @@ func NewService() Service {
 	return s
 }
 
-func (s * service)StatusResults() *service{
+func (s * service)StatusResults() []fileChecker.Service{
 	
-	return test
+	return test.targets
 }
