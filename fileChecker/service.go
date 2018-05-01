@@ -12,28 +12,26 @@ type Service interface {
 }
 
 type service struct {
-	mountPath  string
-	fileStatus map[string]bool
+	mountPath            string
+	fileStatus           map[string]bool
+	fileStatusCollection map[string]map[string]bool
 }
 
-func NewFileChecker(mountpath string, files ...string) *service {
+func NewFileChecker(mountpath string, files ...string) map[string]map[string]bool {
 
 	s := &service{
-		mountPath:  mountpath,
-		fileStatus: make(map[string]bool),
+		mountPath:            mountpath,
+		fileStatus:           make(map[string]bool),
+		fileStatusCollection: make(map[string]map[string]bool),
 	}
 
 	for _, x := range files {
 		value := s.pathToMostRecentFile(mountpath, x)
 		s.fileStatus[x] = value
 	}
+	s.fileStatusCollection[mountpath] = s.fileStatus
 
-	//go func() {
-	//	confirmAvailability := gocron.NewScheduler()
-	//	confirmAvailability.Every(1).Minute().Do(s.ConfirmFileAvailabilityMethod)
-	//}()
-	
-	return s
+	return s.fileStatusCollection
 }
 
 func (s *service) pathToMostRecentFile(dirPath, fileContains string) bool {
