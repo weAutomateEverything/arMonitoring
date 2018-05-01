@@ -12,7 +12,7 @@ type service struct {
 	targets []fileChecker.Service
 }
 
-	var test = &service{}
+var status = &service{}
 
 func NewService() Service {
 	s := &service{}
@@ -36,11 +36,11 @@ func NewService() Service {
 	//Kenya
 	s.targets = append(s.targets, fileChecker.NewFileChecker("/mnt/kenya", append(common)...))
 	
-	test = s
+	status = s
 	return s
 }
 
 func (s * service)StatusResults() []fileChecker.Service{
 	
-	return test.targets
+	return status.targets
 }
