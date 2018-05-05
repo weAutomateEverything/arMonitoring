@@ -33,7 +33,7 @@ func NewFileChecker(mountpath string, files ...string) map[string]map[string]boo
 		value := s.pathToMostRecentFile(mountpath, x)
 		s.fileStatus[x] = value
 	}
-	s.statusCollection[mountpath] = s.fileStatus
+	s.statusCollection[s.locationName] = s.fileStatus
 
 	return s.statusCollection
 }
