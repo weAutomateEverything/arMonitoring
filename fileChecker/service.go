@@ -12,14 +12,16 @@ type Service interface {
 }
 
 type service struct {
+	locationName		 string
 	mountPath            string
 	fileStatus           map[string]bool
 	fileStatusCollection map[string]map[string]bool
 }
 
-func NewFileChecker(mountpath string, files ...string) map[string]map[string]bool {
+func NewFileChecker(name, mountpath string, files ...string) map[string]map[string]bool {
 
 	s := &service{
+		locationName:		  name,
 		mountPath:            mountpath,
 		fileStatus:           make(map[string]bool),
 		fileStatusCollection: make(map[string]map[string]bool),
@@ -29,7 +31,7 @@ func NewFileChecker(mountpath string, files ...string) map[string]map[string]boo
 		value := s.pathToMostRecentFile(mountpath, x)
 		s.fileStatus[x] = value
 	}
-	s.fileStatusCollection[mountpath] = s.fileStatus
+	s.fileStatusCollection[name] = s.fileStatus
 
 	return s.fileStatusCollection
 }
