@@ -22,7 +22,7 @@ func NewService() Service {
 	sched := gocron.NewScheduler()
 
 	go func() {
-		sched.Every(1).Minute().Do(statusCheck)
+		sched.Every(2).Minute().Do(statusCheck)
 		<-sched.Start()
 	}()
 
@@ -42,7 +42,7 @@ func statusCheck() *service {
 	locationBuf := make(chan fileChecker.Service)
 	//Zimbabwe
 
-	wg.Add(8)
+	wg.Add(7)
 	go func() {
 		locationBuf <- fileChecker.NewFileChecker("Zimbabwe", "/mnt/zimbabwe", append(common)...)
 		wg.Done()
@@ -78,10 +78,10 @@ func statusCheck() *service {
 		wg.Done()
 	}()
 	//Kenya
-	go func() {
-		locationBuf <- fileChecker.NewFileChecker("Kenya", "/mnt/kenya", append(common)...)
-		wg.Done()
-	}()
+	//go func() {
+	//	locationBuf <- fileChecker.NewFileChecker("Kenya", "/mnt/kenya", append(common)...)
+	//	wg.Done()
+	//}()
 
 	go func() {
 		wg.Wait()
