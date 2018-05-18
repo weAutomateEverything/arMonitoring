@@ -5,7 +5,6 @@ import (
 	"github.com/weAutomateEverything/fileMonitorService/fileChecker"
 	"log"
 	"sync"
-	"time"
 )
 
 type Service interface {
@@ -56,7 +55,6 @@ func statusCheck() *service {
 	//Ghana
 	go func() {
 		locationBuf <- fileChecker.NewFileChecker("Ghana", "/mnt/ghana", append(common, "MUL")...)
-		time.Sleep(10*time.Second)
 		wg.Done()
 	}()
 	//GhanaUSD
