@@ -22,7 +22,7 @@ func NewService() Service {
 	sched := gocron.NewScheduler()
 
 	go func() {
-		sched.Every(2).Minute().Do(statusCheck)
+		sched.Every(2).Minutes().Do(statusCheck)
 		<-sched.Start()
 	}()
 
