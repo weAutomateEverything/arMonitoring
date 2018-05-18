@@ -51,7 +51,7 @@ func (s *service) pathToMostRecentFile(dirPath, fileContains string) bool {
 		fileList, err = s.GetFilesInPath(dirPath)
 		if err != nil {
 			log.Println(fmt.Sprintf("Failed to access %s. Trying again in 20 seconds", dirPath))
-			time.Sleep(20 * time.Second)
+			time.Sleep(2 * time.Second)
 		}
 		return attempt < 5, err
 	})
