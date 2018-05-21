@@ -16,16 +16,14 @@ type service struct {
 	locationName		 string
 	mountPath            string
 	fileStatus           map[string]bool
-	fileStatusCollection map[string]map[string]bool
 }
 
-func NewFileChecker(name, mountpath string, files ...string) map[string]map[string]bool {
+func NewFileChecker(name, mountpath string, files ...string) (string, map[string]bool) {
 
 	s := &service{
 		locationName:		  name,
 		mountPath:            mountpath,
 		fileStatus:           make(map[string]bool),
-		fileStatusCollection: make(map[string]map[string]bool),
 	}
 
 	log.Println(fmt.Sprintf("Now accessing %s share", name))
@@ -34,11 +32,11 @@ func NewFileChecker(name, mountpath string, files ...string) map[string]map[stri
 		value := s.pathToMostRecentFile(mountpath, x)
 		s.fileStatus[x] = value
 	}
-	s.fileStatusCollection[name] = s.fileStatus
+	//s.fileStatusCollection[name] = s.fileStatus
 
 	log.Println(fmt.Sprintf("Completed file confirmation process on %s share", name))
 
-	return s.fileStatusCollection
+	return s.locationName, s.fileStatus
 }
 
 func (s *service) pathToMostRecentFile(dirPath, fileContains string) bool {
