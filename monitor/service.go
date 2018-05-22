@@ -4,7 +4,6 @@ import (
 	"github.com/jasonlvhit/gocron"
 	"github.com/weAutomateEverything/fileMonitorService/fileChecker"
 	"log"
-	"time"
 )
 
 type Service interface {
@@ -43,7 +42,6 @@ func statusCheck() {
 	}()
 	//Zambia
 	go func() {
-		time.Sleep(10* time.Minute)
 		locName, locMap := fileChecker.NewFileChecker("Zambia", "/mnt/zambiaprod", append(common)...)
 		status.targets[locName] = locMap
 	}()
