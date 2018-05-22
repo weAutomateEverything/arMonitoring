@@ -4,6 +4,7 @@ import (
 	"github.com/jasonlvhit/gocron"
 	"github.com/weAutomateEverything/fileMonitorService/fileChecker"
 	"log"
+	"time"
 )
 
 type Service interface {
@@ -14,9 +15,7 @@ type service struct {
 	targets map[string]map[string]bool
 }
 
-var status = &service{}
-
-
+var status = &service{targets: make(map[string]map[string]bool)}
 
 func NewService() Service {
 
@@ -37,8 +36,6 @@ func statusCheck() {
 	log.Println("File arrival confirmation commencing")
 	common := []string{"SE", "GL", "TXN", "DA", "MS", "EP", "VTRAN", "VOUT", "VISA_OUTGOING_MONET_TRANS_REPORT", "VISA_INCOMING_FILES_SUMMARY_REPORT", "TRANS_INPUT_LIST_", "VISA_INCOMING_MONET_TRANS_REPORT", "VISA_OUTGOING_FILES_SUMMARY_REPORT", "MC_INCOMING_MONET_TRANS_REPORT", "MC_OUTGOING_MONET_TRANS_REPORT", "RECON_REPORT", "MERCH_REJ_TRANS", "MC_OUTGOING_FILES_SUMMARY_REPORT", "MASTERCARD_ACKNOWLEDGEMENT_REPORT", "MC_INCOMING_FILES_SUMMARY_REPORT", ".001", ".002", ".003", ".004", ".005", ".006"}
 
-	status.targets = make(map[string]map[string]bool)
-
 	//Zimbabwe
 	go func() {
 		locName, locMap := fileChecker.NewFileChecker("Zimbabwe", "/mnt/zimbabwe", append(common)...)
@@ -46,6 +43,7 @@ func statusCheck() {
 	}()
 	//Zambia
 	go func() {
+		time.Sleep(10* time.Minute)
 		locName, locMap := fileChecker.NewFileChecker("Zambia", "/mnt/zambiaprod", append(common)...)
 		status.targets[locName] = locMap
 	}()
