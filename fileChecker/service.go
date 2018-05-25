@@ -16,6 +16,14 @@ type service struct {
 	locationName string
 	mountPath    string
 	fileStatus   map[string]string
+	receivedStatus map[string]string
+}
+
+var receiveStat = CreateReceiveStat()
+
+func CreateReceiveStat() *service{
+	var re = &service{receivedStatus: make(map[string]string)}
+	return re
 }
 
 func NewFileChecker(name, mountpath string, files ...string) (string, map[string]string) {
@@ -32,7 +40,6 @@ func NewFileChecker(name, mountpath string, files ...string) (string, map[string
 		value := s.pathToMostRecentFile(mountpath, x)
 		s.fileStatus[x] = value
 	}
-	//s.fileStatusCollection[name] = s.fileStatus
 
 	log.Println(fmt.Sprintf("Completed file confirmation process on %s share", name))
 
@@ -64,14 +71,21 @@ func (s *service) pathToMostRecentFile(dirPath, fileContains string) string {
 	convertedTime := convertTime(currentTime)
 
 	for _, file := range fileList {
+		if _, ok := receiveStat.receivedStatus[file]; ok{
+			s.fileStatus[file] = receiveStat.receivedStatus[file]
+			continue
+		}
+
 		expectedTime := expectedFileArivalTime(fileContains)
 		cont := strings.Contains(file, fileContains)
 		recent := strings.Contains(file, currentDate)
 
 		if recent == true && cont == true && convertedTime.After(expectedTime){
+			receiveStat.receivedStatus[file] = "late"
 			return "late"
 		}
 		if recent == true && cont == true && convertedTime.Before(expectedTime){
+			receiveStat.receivedStatus[file] = "received"
 			return "received"
 		}
 	}
