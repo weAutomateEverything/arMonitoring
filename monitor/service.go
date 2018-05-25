@@ -19,11 +19,19 @@ var status = &service{targets: make(map[string]map[string]string)}
 func NewService() Service {
 
 	sched := gocron.NewScheduler()
+	receiveStatusSched := gocron.NewScheduler()
+
+	go func() {
+		receiveStatusSched.Every(1).Day().At("00:00").Do(fileChecker.CreateReceiveStat)
+		<-sched.Start()
+	}()
 
 	go func() {
 		sched.Every(5).Minutes().Do(statusCheck)
 		<-sched.Start()
 	}()
+
+	fileChecker.CreateReceiveStat()
 
 	statusCheck()
 
