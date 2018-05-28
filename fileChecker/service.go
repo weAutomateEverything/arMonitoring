@@ -10,48 +10,75 @@ import (
 )
 
 type Service interface {
+	GetValues() map[string]string
+	GetLocationName() string
 }
 
 type service struct {
 	locationName string
 	mountPath    string
+	files        []string
 	fileStatus   map[string]string
 }
 
-func NewFileChecker(name, mountpath string, files ...string) (string, map[string]string) {
+func NewFileChecker(name, mountpath string, files ...string) Service {
 
 	s := &service{
 		locationName: name,
 		mountPath:    mountpath,
+		files:        files,
 		fileStatus:   make(map[string]string),
 	}
 
-	log.Println(fmt.Sprintf("Now accessing %s share", name))
-
-	for _, x := range files {
-		value, err := s.pathToMostRecentFile(mountpath, x)
-		if err != nil {
-			for _, file := range files {
-				s.fileStatus[file] = "unaccessable"
-			}
-			return s.locationName, s.fileStatus
-		}
-		s.fileStatus[x] = value
-	}
-
-	log.Println(fmt.Sprintf("Completed file confirmation process on %s share", name))
-
-	return s.locationName, s.fileStatus
+	go func() {
+		s.setValues(s.locationName, s.mountPath, s.files)
+	}()
+	return s
 }
 
-func (s *service) pathToMostRecentFile(dirPath, fileContains string) (string, error) {
+func (s *service) GetValues() map[string]string {
+	return s.fileStatus
+}
+
+func (s *service) GetLocationName() string {
+	return s.locationName
+}
+
+func (s *service) setValues(name, mountpath string, files []string) {
+
+	for true {
+		log.Println(fmt.Sprintf("Now accessing %s share", name))
+
+		for _, x := range files {
+			value, err := s.setFileStatus(mountpath, x)
+			if err != nil {
+				for _, file := range files {
+					s.fileStatus[file] = "unaccessable"
+				}
+			}
+			if _, ok := s.fileStatus[x]; ok {
+				if s.fileStatus[x] == "unaccessable" {
+					s.fileStatus[x] = "notreceived"
+				}
+				if s.fileStatus[x] != "notreceived" || s.fileStatus[x] != "unaccessable" {
+					continue
+				}
+			}
+			s.fileStatus[x] = value
+		}
+		log.Println(fmt.Sprintf("Completed file confirmation process on %s share", name))
+		time.Sleep(10 * time.Second)
+	}
+}
+
+func (s *service) setFileStatus(dirPath, fileContains string) (string, error) {
 
 	var fileList []string
 
 	err := try.Do(func(attempt int) (bool, error) {
 
 		var err error
-		fileList, err = s.GetFilesInPath(dirPath)
+		fileList, err = s.getListOfFilesInPath(dirPath)
 		if err != nil {
 			log.Println(fmt.Sprintf("Failed to access %s. Trying again in 2 seconds", dirPath))
 			time.Sleep(2 * time.Second)
@@ -81,6 +108,29 @@ func (s *service) pathToMostRecentFile(dirPath, fileContains string) (string, er
 		}
 	}
 	return "notreceived", nil
+}
+
+func convertTime(unconvertedTime string) time.Time {
+
+	t, err := time.Parse("15:04:05", unconvertedTime)
+	if err != nil {
+		log.Printf("Failed to convert time with the following error: %v", err)
+	}
+	return t
+}
+
+func (s *service) getListOfFilesInPath(path string) ([]string, error) {
+
+	dir, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+
+	defer dir.Close()
+
+	list, _ := dir.Readdirnames(0)
+
+	return list, nil
 }
 
 func expectedFileArivalTime(file string) time.Time {
@@ -130,27 +180,4 @@ func expectedFileArivalTime(file string) time.Time {
 	t := convertTime(expectedTime)
 
 	return t
-}
-
-func convertTime(unconvertedTime string) time.Time {
-
-	t, err := time.Parse("15:04:05", unconvertedTime)
-	if err != nil {
-		log.Printf("Failed to convert time with the following error: %v", err)
-	}
-	return t
-}
-
-func (s *service) GetFilesInPath(path string) ([]string, error) {
-
-	dir, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-
-	defer dir.Close()
-
-	list, _ := dir.Readdirnames(0)
-
-	return list, nil
 }
