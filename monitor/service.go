@@ -1,6 +1,7 @@
 package monitor
 
 import (
+	"github.com/jasonlvhit/gocron"
 	"github.com/weAutomateEverything/fileMonitorService/fileChecker"
 	"log"
 )
@@ -23,11 +24,9 @@ func NewService() Service {
 	//Zimbabwe
 	zimbabwe := fileChecker.NewFileChecker("Zimbabwe", "/mnt/zimbabwe", append(common)...)
 	s.globalStatus = append(s.globalStatus, zimbabwe)
-
 	//Zambia
 	zambia := fileChecker.NewFileChecker("Zambia", "/mnt/zambiaprod", append(common)...)
 	s.globalStatus = append(s.globalStatus, zambia)
-
 	//Ghana
 	ghana := fileChecker.NewFileChecker("Ghana", "/mnt/ghana", append(common, "MUL")...)
 	s.globalStatus = append(s.globalStatus, ghana)
@@ -43,7 +42,19 @@ func NewService() Service {
 	//Malawi
 	malawi := fileChecker.NewFileChecker("Malawi", "/mnt/malawi", append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_")...)
 	s.globalStatus = append(s.globalStatus, malawi)
+
+	resetsched := gocron.NewScheduler()
+
+	resetsched.Every(1).Day().At("00:00").Do(s.resetValues)
+
 	return s
+}
+
+func (s *service) resetValues() {
+
+	for _, loc := range s.globalStatus {
+		loc.Reset()
+	}
 }
 
 func (s *service) StatusResults() map[string]map[string]string {

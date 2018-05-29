@@ -12,6 +12,7 @@ import (
 type Service interface {
 	GetValues() map[string]string
 	GetLocationName() string
+	Reset()
 }
 
 type service struct {
@@ -33,6 +34,7 @@ func NewFileChecker(name, mountpath string, files ...string) Service {
 	go func() {
 		s.setValues(s.locationName, s.mountPath, s.files)
 	}()
+
 	return s
 }
 
@@ -42,6 +44,12 @@ func (s *service) GetValues() map[string]string {
 
 func (s *service) GetLocationName() string {
 	return s.locationName
+}
+
+func (s *service) Reset() {
+	for _, v := range s.fileStatus {
+		s.fileStatus[v] = "notreceived"
+	}
 }
 
 func (s *service) setValues(name, mountpath string, files []string) {
@@ -67,7 +75,7 @@ func (s *service) setValues(name, mountpath string, files []string) {
 			s.fileStatus[x] = value
 		}
 		log.Println(fmt.Sprintf("Completed file confirmation process on %s share", name))
-		time.Sleep(10 * time.Second)
+		time.Sleep(4 * time.Minute)
 	}
 }
 
