@@ -45,16 +45,21 @@ func NewService() Service {
 
 	resetsched := gocron.NewScheduler()
 
-	resetsched.Every(1).Day().At("00:00").Do(s.resetValues)
+	go func() {
+		resetsched.Every(1).Day().At("00:01").Do(s.resetValues)
+		<-resetsched.Start()
+	}()
 
 	return s
 }
 
 func (s *service) resetValues() {
+	log.Println("Midnight reset initiated")
 
 	for _, loc := range s.globalStatus {
 		loc.Reset()
 	}
+	log.Println("Midnight reset completed")
 }
 
 func (s *service) StatusResults() map[string]map[string]string {
