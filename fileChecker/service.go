@@ -47,8 +47,9 @@ func (s *service) GetLocationName() string {
 }
 
 func (s *service) Reset() {
-	for _, v := range s.fileStatus {
-		s.fileStatus[v] = "notreceived"
+	log.Printf("Resetting %s", s.locationName)
+	for k := range s.fileStatus {
+		s.fileStatus[k] = "notreceived"
 	}
 }
 
