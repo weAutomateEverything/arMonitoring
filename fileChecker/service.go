@@ -68,7 +68,7 @@ func (s *service) setValues(name, mountpath string, files []string) {
 				if s.fileStatus[x] == "unaccessable" {
 					s.fileStatus[x] = "notreceived"
 				}
-				if s.fileStatus[x] != "notreceived" || s.fileStatus[x] != "unaccessable" {
+				if s.fileStatus[x] == "late" || s.fileStatus[x] == "received" {
 					continue
 				}
 			}
