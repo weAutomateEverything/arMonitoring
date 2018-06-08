@@ -170,7 +170,7 @@ func expectedFileArivalTime(file string) time.Time {
 		"MUL":                               "01:30:00",
 		"RECON_REPORT":                      "05:30:00",
 		"SE":                                "01:30:00",
-		"SPTLSB_NA_":                        "21:00:00",
+		"SPTLSB":                        	 "21:00:00",
 		"SR00001":                           "01:30:00",
 		"TRANS_INPUT_LIST_":                 "05:30:00",
 		"TXN":                               "01:30:00",
