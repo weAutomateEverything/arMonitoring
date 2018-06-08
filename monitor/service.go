@@ -42,6 +42,9 @@ func NewService() Service {
 	//Malawi
 	malawi := fileChecker.NewFileChecker("Malawi", "/mnt/malawi", append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_")...)
 	s.globalStatus = append(s.globalStatus, malawi)
+	//Kenya
+	kenya := fileChecker.NewFileChecker("Kenya", "/mnt/malawi", append(common)...)
+	s.globalStatus = append(s.globalStatus, kenya)
 
 	resetsched := gocron.NewScheduler()
 
