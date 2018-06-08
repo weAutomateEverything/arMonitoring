@@ -8,7 +8,7 @@ import (
 )
 
 type Store interface {
-	GetLocationStateRecent(locationName string) map[string]string
+	getLocationStateRecent(locationName string) map[string]string
 	addLocationStateRecent(locationName string, locationFileStatus map[string]string) error
 }
 
@@ -26,10 +26,10 @@ func NewMongoStore(mongo *mgo.Database) Store {
 	return &mongoStore{mongo}
 }
 
-func (s mongoStore) GetLocationStateRecent(locationName string) map[string]string {
+func (s mongoStore) getLocationStateRecent(locationName string) map[string]string {
 	c := s.mongo.C("GlobalStateRecent")
 	var gloState globalState
-	c.Find(bson.M{"locationnanme": locationName}).One(&gloState)
+	c.Find(bson.M{"locationname": locationName}).One(&gloState)
 	return gloState.LocationFileStatus
 }
 

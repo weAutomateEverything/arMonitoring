@@ -33,6 +33,8 @@ func NewFileChecker(store Store, name, mountpath string, files ...string) Servic
 		store:        store,
 	}
 
+	s.fileStatus = store.getLocationStateRecent(name)
+
 	go func() {
 		s.setValues(s.locationName, s.mountPath, s.files)
 	}()
