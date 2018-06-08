@@ -41,7 +41,7 @@ func NewService(store Store, fileStore fileChecker.Store) Service {
 	namibia := fileChecker.NewFileChecker(fileStore, "Namibia", "/mnt/namibia", append(common, "MUL", "INT00001", "INT00003", "INT00007", "SR00001", "SPTLSB_NA_", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI")...)
 	s.globalStatus = append(s.globalStatus, namibia)
 	//Malawi
-	malawi := fileChecker.NewFileChecker("Malawi", "/mnt/malawi", append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI")...)
+	malawi := fileChecker.NewFileChecker(fileStore, "Malawi", "/mnt/malawi", append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI")...)
 	s.globalStatus = append(s.globalStatus, malawi)
 
 	resetsched := gocron.NewScheduler()
