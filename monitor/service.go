@@ -40,7 +40,7 @@ func NewService() Service {
 	namibia := fileChecker.NewFileChecker("Namibia", "/mnt/namibia", append(common, "MUL", "INT00001", "INT00003", "INT00007", "SR00001", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI")...)
 	s.globalStatus = append(s.globalStatus, namibia)
 	//Malawi
-	malawi := fileChecker.NewFileChecker("Malawi", "/mnt/malawi", append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_")...)
+	malawi := fileChecker.NewFileChecker("Malawi", "/mnt/malawi", append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI")...)
 	s.globalStatus = append(s.globalStatus, malawi)
 	//Kenya
 	kenya := fileChecker.NewFileChecker("Kenya", "/mnt/kenya", append(common)...)
