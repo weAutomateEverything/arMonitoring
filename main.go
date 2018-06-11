@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/weAutomateEverything/fileMonitorService/database"
+	"github.com/weAutomateEverything/go2hal/database"
 	"github.com/weAutomateEverything/fileMonitorService/fileChecker"
 	"github.com/weAutomateEverything/fileMonitorService/monitor"
 	"os/signal"

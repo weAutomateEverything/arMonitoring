@@ -4,12 +4,11 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"log"
-	"time"
 )
 
 type Store interface {
 	getLocationStateRecent(locationName string) map[string]string
-	addLocationStateRecent(locationName string, locationFileStatus map[string]string) error
+	setLocationStateRecent(locationName string, locationFileStatus map[string]string)
 }
 
 type mongoStore struct {
@@ -17,8 +16,7 @@ type mongoStore struct {
 }
 
 type globalState struct {
-	LastUpdate         time.Time
-	LocationName       string
+	LocationName        string `bson:"_id,omitempty"`
 	LocationFileStatus map[string]string
 }
 
@@ -27,22 +25,24 @@ func NewMongoStore(mongo *mgo.Database) Store {
 }
 
 func (s mongoStore) getLocationStateRecent(locationName string) map[string]string {
-	c := s.mongo.C("GlobalStateRecent")
+	c := s.mongo.C("LocationStateRecent")
 	var gloState globalState
-	c.Find(bson.M{"locationname": locationName}).One(&gloState)
+	c.Find(bson.M{"_id": locationName}).One(&gloState)
 	return gloState.LocationFileStatus
 }
 
-func (s mongoStore) addLocationStateRecent(locationName string, locationFileStatus map[string]string) error {
-	log.Println("Storing recent global state")
-	c := s.mongo.C("GlobalStateRecent")
-	stateItem := globalState{}
-	stateItem.LastUpdate = time.Now()
-	stateItem.LocationName = locationName
-	stateItem.LocationFileStatus = locationFileStatus
-	err := c.Insert(stateItem)
-	if err != nil {
-		return err
+func (s mongoStore) setLocationStateRecent(locationName string, locationFileStatus map[string]string) {
+	log.Println("Storing/updating recent location state")
+	c := s.mongo.C("LocationStateRecent")
+
+	var state globalState
+	err := c.Find(bson.M{"_id": locationName}).One(&state)
+	if err == nil {
+		currentState := bson.M{"_id": locationName}
+		change := bson.M{"$set": bson.M{"locationfilestatus": locationFileStatus}}
+		c.Update(currentState, change)
+	} else {
+		state := globalState{LocationName: locationName, LocationFileStatus: locationFileStatus}
+		c.Insert(state)
 	}
-	return nil
 }

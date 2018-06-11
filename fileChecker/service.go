@@ -89,7 +89,7 @@ func (s *service) setValues(name, mountpath string, files []string) {
 }
 
 func (s *service) storeLocationStateRecent(name string, fileStatus map[string]string) {
-	s.store.addLocationStateRecent(name, fileStatus)
+	s.store.setLocationStateRecent(name, fileStatus)
 }
 
 func (s *service) setFileStatus(dirPath, fileContains string) (string, error) {
