@@ -16,7 +16,7 @@ type mongoStore struct {
 }
 
 type globalState struct {
-	LocationName        string `bson:"_id,omitempty"`
+	LocationName       string `bson:"_id,omitempty"`
 	LocationFileStatus map[string]string
 }
 
@@ -35,13 +35,13 @@ func (s mongoStore) setLocationStateRecent(locationName string, locationFileStat
 	log.Println("Storing/updating recent location state")
 	c := s.mongo.C("LocationStateRecent")
 
-	var state globalState
-	err := c.Find(bson.M{"_id": locationName}).One(&state)
+	var gloState globalState
+	err := c.FindId(locationName).One(&gloState)
 	if err == nil {
-		currentState := bson.M{"_id": locationName}
 		change := bson.M{"$set": bson.M{"locationfilestatus": locationFileStatus}}
-		c.Update(currentState, change)
+		c.UpdateId(locationName, change)
 	} else {
+		log.Print(err)
 		state := globalState{LocationName: locationName, LocationFileStatus: locationFileStatus}
 		c.Insert(state)
 	}
