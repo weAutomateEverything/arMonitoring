@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/weAutomateEverything/go2hal/database"
+	"github.com/weAutomateEverything/fileMonitorService/fileChecker"
 	"github.com/weAutomateEverything/fileMonitorService/monitor"
 	"os/signal"
 	"syscall"
@@ -24,17 +26,22 @@ func main() {
 
 	fieldKeys := []string{"method"}
 
-	mon := monitor.NewService()
-	mon = monitor.NewLoggingService(log.With(logger, "component", "fileAvailability"), mon)
+	db := database.NewConnection()
+
+	dailyStore := monitor.NewMongoStore(db)
+	recentStore := fileChecker.NewMongoStore(db)
+
+	mon := monitor.NewService(dailyStore, recentStore)
+	mon = monitor.NewLoggingService(log.With(logger, "component", "fileMonitor"), mon)
 	mon = monitor.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace: "api",
-		Subsystem: "fileChecker",
+		Subsystem: "fileMonitor",
 		Name:      "request_count",
 		Help:      "Number of requests received.",
 	}, fieldKeys),
 		kitprometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
 			Namespace: "api",
-			Subsystem: "fileChecker",
+			Subsystem: "fileMonitor",
 			Name:      "request_latency_microseconds",
 			Help:      "Total duration of requests in microseconds.",
 		}, fieldKeys), mon)

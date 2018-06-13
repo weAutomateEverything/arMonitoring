@@ -20,15 +20,26 @@ type service struct {
 	mountPath    string
 	files        []string
 	fileStatus   map[string]string
+	store        Store
 }
 
-func NewFileChecker(name, mountpath string, files ...string) Service {
+func NewFileChecker(store Store, name, mountpath string, files ...string) Service {
 
 	s := &service{
 		locationName: name,
 		mountPath:    mountpath,
 		files:        files,
 		fileStatus:   make(map[string]string),
+		store:        store,
+	}
+
+	storeContents, err := store.getLocationStateRecent(name)
+	if err != nil {
+		log.Println("Failed to access persistance layer with the following error: ", err)
+	}
+
+	if storeContents != nil {
+		s.fileStatus = storeContents
 	}
 
 	go func() {
@@ -75,9 +86,15 @@ func (s *service) setValues(name, mountpath string, files []string) {
 			}
 			s.fileStatus[x] = value
 		}
+
+		s.storeLocationStateRecent(s.locationName, s.fileStatus)
 		log.Println(fmt.Sprintf("Completed file confirmation process on %s share", name))
 		time.Sleep(4 * time.Minute)
 	}
+}
+
+func (s *service) storeLocationStateRecent(name string, fileStatus map[string]string) {
+	s.store.setLocationStateRecent(name, fileStatus)
 }
 
 func (s *service) setFileStatus(dirPath, fileContains string) (string, error) {
@@ -170,7 +187,7 @@ func expectedFileArivalTime(file string) time.Time {
 		"MUL":                               "01:30:00",
 		"RECON_REPORT":                      "05:30:00",
 		"SE":                                "01:30:00",
-		"SPTLSB":                        	 "21:00:00",
+		"SPTLSB":                            "21:00:00",
 		"SR00001":                           "01:30:00",
 		"TRANS_INPUT_LIST_":                 "05:30:00",
 		"TXN":                               "01:30:00",

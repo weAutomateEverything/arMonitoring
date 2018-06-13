@@ -12,45 +12,49 @@ type Service interface {
 
 type service struct {
 	globalStatus []fileChecker.Service
+	store        Store
 }
 
-func NewService() Service {
+func NewService(store Store, fileStore fileChecker.Store) Service {
 
-	s := &service{}
+	s := &service{store: store}
 
 	log.Println("File arrival confirmation commencing")
 	common := []string{"SE", "GL", "TXN", "DA", "MS", "EP747", "VTRAN", "VOUT", "VISA_OUTGOING_MONET_TRANS_REPORT", "VISA_INCOMING_FILES_SUMMARY_REPORT", "TRANS_INPUT_LIST_", "VISA_INCOMING_MONET_TRANS_REPORT", "VISA_OUTGOING_FILES_SUMMARY_REPORT", "MC_INCOMING_MONET_TRANS_REPORT", "MC_OUTGOING_MONET_TRANS_REPORT", "RECON_REPORT", "MERCH_REJ_TRANS", "MC_OUTGOING_FILES_SUMMARY_REPORT", "MASTERCARD_ACKNOWLEDGEMENT_REPORT", "MC_INCOMING_FILES_SUMMARY_REPORT", ".001", ".002", ".003", ".004", ".005", ".006", "SPTLSB"}
 
 	//Zimbabwe
-	zimbabwe := fileChecker.NewFileChecker("Zimbabwe", "/mnt/zimbabwe", append(common)...)
+	zimbabwe := fileChecker.NewFileChecker(fileStore, "Zimbabwe", "/mnt/zimbabwe", append(common)...)
 	s.globalStatus = append(s.globalStatus, zimbabwe)
 	//Zambia
-	zambia := fileChecker.NewFileChecker("Zambia", "/mnt/zambiaprod", append(common)...)
+	zambia := fileChecker.NewFileChecker(fileStore, "Zambia", "/mnt/zambiaprod", append(common)...)
 	s.globalStatus = append(s.globalStatus, zambia)
 	//Ghana
-	ghana := fileChecker.NewFileChecker("Ghana", "/mnt/ghana", append(common, "MUL")...)
+	ghana := fileChecker.NewFileChecker(fileStore, "Ghana", "/mnt/ghana", append(common, "MUL")...)
 	s.globalStatus = append(s.globalStatus, ghana)
 	//GhanaUSD
-	ghanausd := fileChecker.NewFileChecker("GhanaUSD", "/mnt/ghanausd", append(common)...)
+	ghanausd := fileChecker.NewFileChecker(fileStore, "GhanaUSD", "/mnt/ghanausd", append(common)...)
 	s.globalStatus = append(s.globalStatus, ghanausd)
 	//Botswana
-	botswana := fileChecker.NewFileChecker("Botswana", "/mnt/botswana", append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_")...)
+	botswana := fileChecker.NewFileChecker(fileStore, "Botswana", "/mnt/botswana", append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_")...)
 	s.globalStatus = append(s.globalStatus, botswana)
 	//Namibia
-	namibia := fileChecker.NewFileChecker("Namibia", "/mnt/namibia", append(common, "MUL", "INT00001", "INT00003", "INT00007", "SR00001", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI")...)
+	namibia := fileChecker.NewFileChecker(fileStore, "Namibia", "/mnt/namibia", append(common, "MUL", "INT00001", "INT00003", "INT00007", "SR00001", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI")...)
 	s.globalStatus = append(s.globalStatus, namibia)
 	//Malawi
-	malawi := fileChecker.NewFileChecker("Malawi", "/mnt/malawi", append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI")...)
+	malawi := fileChecker.NewFileChecker(fileStore, "Malawi", "/mnt/malawi", append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI")...)
 	s.globalStatus = append(s.globalStatus, malawi)
-	//Kenya
-	kenya := fileChecker.NewFileChecker("Kenya", "/mnt/kenya", append(common)...)
-	s.globalStatus = append(s.globalStatus, kenya)
 
 	resetsched := gocron.NewScheduler()
+	globalStateDailySched := gocron.NewScheduler()
 
 	go func() {
 		resetsched.Every(1).Day().At("00:01").Do(s.resetValues)
 		<-resetsched.Start()
+	}()
+
+	go func() {
+		globalStateDailySched.Every(1).Day().At("11:55").Do(s.storeGlobalStateDaily)
+		<-globalStateDailySched.Start()
 	}()
 
 	return s
@@ -74,4 +78,8 @@ func (s *service) StatusResults() map[string]map[string]string {
 	}
 
 	return response
+}
+
+func (s *service) storeGlobalStateDaily() {
+	s.store.addGlobalStateDaily(s.StatusResults())
 }
