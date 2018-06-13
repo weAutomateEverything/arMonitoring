@@ -23,13 +23,9 @@ func NewMongoStore(mongo *mgo.Database) Store {
 	return &mongoStore{mongo}
 }
 
-func (s mongoStore) addGlobalStateDaily(globalFileStatus map[string]map[string]string) error{
+func (s mongoStore) addGlobalStateDaily(globalFileStatus map[string]map[string]string) error {
 	log.Println("Storing daily global state")
 	c := s.mongo.C("GlobalStateDaily")
 	stateItem := globalState{LastUpdate: time.Now(), GlobalFileStatus: globalFileStatus}
-	err := c.Insert(stateItem)
-	if err != nil {
-		return err
-	}
-	return nil
+	return c.Insert(stateItem)
 }

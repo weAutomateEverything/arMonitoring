@@ -41,17 +41,9 @@ func (s mongoStore) setLocationStateRecent(locationName string, locationFileStat
 	err := c.FindId(locationName).One(&locState)
 	if err == nil {
 		locState.LocationFileStatus = locationFileStatus
-		 err := c.UpdateId(locationName, locState.LocationFileStatus)
-		 if err != nil {
-		 	return err
-		 }
-	} else {
-		log.Print(err)
-		state := locationState{LocationName: locationName, LocationFileStatus: locationFileStatus}
-		err := c.Insert(state)
-		if err != nil {
-			return err
-		}
+		return c.UpdateId(locationName, locState.LocationFileStatus)
 	}
-	return nil
+	log.Print(err)
+	state := locationState{LocationName: locationName, LocationFileStatus: locationFileStatus}
+	return c.Insert(state)
 }
