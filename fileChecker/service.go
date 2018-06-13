@@ -16,22 +16,24 @@ type Service interface {
 }
 
 type service struct {
-	locationName string
-	mountPath    string
-	files        []string
-	fileStatus   map[string]string
-	store        Store
+	locationName   string
+	mountPath      string
+	files          []string
+	backDatedFiles []string
+	fileStatus     map[string]string
+  store        Store
 }
 
-func NewFileChecker(store Store, name, mountpath string, files ...string) Service {
+func NewFileChecker(store Store, name, mountpath string, bdFiles []string, files ...string) Service {
 
 	s := &service{
-		locationName: name,
-		mountPath:    mountpath,
-		files:        files,
-		fileStatus:   make(map[string]string),
-		store:        store,
-	}
+		locationName:   name,
+		mountPath:      mountpath,
+		files:          files,
+		backDatedFiles: bdFiles,
+		fileStatus:     make(map[string]string),
+    store:        store,
+  }
 
 	storeContents, err := store.getLocationStateRecent(name)
 	if err != nil {
@@ -43,7 +45,7 @@ func NewFileChecker(store Store, name, mountpath string, files ...string) Servic
 	}
 
 	go func() {
-		s.setValues(s.locationName, s.mountPath, s.files)
+		s.setValues(s.locationName, s.mountPath, s.backDatedFiles, s.files)
 	}()
 
 	return s
@@ -64,13 +66,13 @@ func (s *service) Reset() {
 	}
 }
 
-func (s *service) setValues(name, mountpath string, files []string) {
+func (s *service) setValues(name, mountpath string, bdFiles []string, files []string) {
 
 	for true {
 		log.Println(fmt.Sprintf("Now accessing %s share", name))
 
 		for _, x := range files {
-			value, err := s.setFileStatus(mountpath, x)
+			value, err := s.setFileStatus(mountpath, x, bdFiles)
 			if err != nil {
 				for _, file := range files {
 					s.fileStatus[file] = "unaccessable"
@@ -97,12 +99,12 @@ func (s *service) storeLocationStateRecent(name string, fileStatus map[string]st
 	s.store.setLocationStateRecent(name, fileStatus)
 }
 
-func (s *service) setFileStatus(dirPath, fileContains string) (string, error) {
+func (s *service) setFileStatus(dirPath, fileContains string, bdFiles []string) (string, error) {
 
 	var fileList []string
 
+	//Attempt connection
 	err := try.Do(func(attempt int) (bool, error) {
-
 		var err error
 		fileList, err = s.getListOfFilesInPath(dirPath)
 		if err != nil {
@@ -116,24 +118,49 @@ func (s *service) setFileStatus(dirPath, fileContains string) (string, error) {
 		return "", err
 	}
 
+	yesterdayDate := time.Now().AddDate(0, 0, -1).Format("20060102")
 	currentDate := time.Now().Format("20060102")
 	currentTime := time.Now().Format("15:04:05")
 
 	convertedTime := convertTime(currentTime)
 
 	for _, file := range fileList {
+
+		backdated := checkBackDated(file, bdFiles)
+
 		expectedTime := expectedFileArivalTime(fileContains)
 		cont := strings.Contains(file, fileContains)
-		recent := strings.Contains(file, currentDate)
 
-		if recent == true && cont == true && convertedTime.After(expectedTime) {
-			return "late", nil
-		}
-		if recent == true && cont == true && convertedTime.Before(expectedTime) {
-			return "received", nil
+		if backdated && cont {
+			return response(file, yesterdayDate, convertedTime, expectedTime), nil
+		} else if cont {
+			return response(file, currentDate, convertedTime, expectedTime), nil
 		}
 	}
 	return "notreceived", nil
+}
+
+func response(file, date string, convertedTime, expectedTime time.Time) string {
+	recent := strings.Contains(file, date)
+
+	if recent && convertedTime.After(expectedTime) {
+		return "late"
+	}
+	if recent && convertedTime.Before(expectedTime) {
+		return "received"
+	}
+	return "notreceived"
+}
+
+//Check if a file has to be back dated
+func checkBackDated(file string, bdFiles []string) bool {
+
+	for _, bdfile := range bdFiles {
+		if strings.Contains(file, bdfile) {
+			return true
+		}
+	}
+	return false
 }
 
 func convertTime(unconvertedTime string) time.Time {
