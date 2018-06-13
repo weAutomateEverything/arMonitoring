@@ -114,26 +114,25 @@ func (s *service) setFileStatus(dirPath, fileContains string, bdFiles []string) 
 		expectedTime := expectedFileArivalTime(fileContains)
 		cont := strings.Contains(file, fileContains)
 
-		if backdated == true {
-			recent := strings.Contains(file, yesterdayDate)
-
-			if recent == true && cont == true && convertedTime.After(expectedTime) {
-				return "late", nil
-			}
-			if recent == true && cont == true && convertedTime.Before(expectedTime) {
-				return "received", nil
-			}
-		} else {
-			recent := strings.Contains(file, currentDate)
-			if recent == true && cont == true && convertedTime.After(expectedTime) {
-				return "late", nil
-			}
-			if recent == true && cont == true && convertedTime.Before(expectedTime) {
-				return "received", nil
-			}
+		if backdated && cont {
+			return response(file, yesterdayDate, convertedTime, expectedTime), nil
+		} else if cont {
+			return response(file, currentDate, convertedTime, expectedTime), nil
 		}
 	}
 	return "notreceived", nil
+}
+
+func response(file, date string, convertedTime, expectedTime time.Time) string {
+	recent := strings.Contains(file, date)
+
+	if recent && convertedTime.After(expectedTime) {
+		return "late"
+	}
+	if recent && convertedTime.Before(expectedTime) {
+		return "received"
+	}
+	return "notreceived"
 }
 
 //Check if a file has to be back dated
