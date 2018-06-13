@@ -21,9 +21,10 @@ type service struct {
 	files          []string
 	backDatedFiles []string
 	fileStatus     map[string]string
+  store        Store
 }
 
-func NewFileChecker(name, mountpath string, bdFiles []string, files ...string) Service {
+func NewFileChecker(store Store, name, mountpath string, bdFiles []string, files ...string) Service {
 
 	s := &service{
 		locationName:   name,
@@ -31,6 +32,16 @@ func NewFileChecker(name, mountpath string, bdFiles []string, files ...string) S
 		files:          files,
 		backDatedFiles: bdFiles,
 		fileStatus:     make(map[string]string),
+    store:        store,
+  }
+
+	storeContents, err := store.getLocationStateRecent(name)
+	if err != nil {
+		log.Println("Failed to access persistance layer with the following error: ", err)
+	}
+
+	if storeContents != nil {
+		s.fileStatus = storeContents
 	}
 
 	go func() {
@@ -77,9 +88,15 @@ func (s *service) setValues(name, mountpath string, bdFiles []string, files []st
 			}
 			s.fileStatus[x] = value
 		}
+
+		s.storeLocationStateRecent(s.locationName, s.fileStatus)
 		log.Println(fmt.Sprintf("Completed file confirmation process on %s share", name))
 		time.Sleep(4 * time.Minute)
 	}
+}
+
+func (s *service) storeLocationStateRecent(name string, fileStatus map[string]string) {
+	s.store.setLocationStateRecent(name, fileStatus)
 }
 
 func (s *service) setFileStatus(dirPath, fileContains string, bdFiles []string) (string, error) {
