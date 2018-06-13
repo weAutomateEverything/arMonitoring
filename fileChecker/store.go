@@ -2,7 +2,6 @@ package fileChecker
 
 import (
 	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
 	"log"
 )
 
@@ -15,7 +14,7 @@ type mongoStore struct {
 	mongo *mgo.Database
 }
 
-type globalState struct {
+type locationState struct {
 	LocationName       string `bson:"_id,omitempty"`
 	LocationFileStatus map[string]string
 }
@@ -26,23 +25,26 @@ func NewMongoStore(mongo *mgo.Database) Store {
 
 func (s mongoStore) getLocationStateRecent(locationName string) map[string]string {
 	c := s.mongo.C("LocationStateRecent")
-	var gloState globalState
-	c.Find(bson.M{"_id": locationName}).One(&gloState)
-	return gloState.LocationFileStatus
+	var locState locationState
+	c.FindId(locationName).One(&locState)
+	return locState.LocationFileStatus
 }
 
 func (s mongoStore) setLocationStateRecent(locationName string, locationFileStatus map[string]string) {
 	log.Println("Storing/updating recent location state")
 	c := s.mongo.C("LocationStateRecent")
 
-	var gloState globalState
-	err := c.FindId(locationName).One(&gloState)
+	var locState locationState
+	err := c.FindId(locationName).One(&locState)
 	if err == nil {
-		change := bson.M{"$set": bson.M{"locationfilestatus": locationFileStatus}}
-		c.UpdateId(locationName, change)
+		locState.LocationFileStatus = locationFileStatus
+		c.UpdateId(locationName, locState.LocationFileStatus)
 	} else {
 		log.Print(err)
-		state := globalState{LocationName: locationName, LocationFileStatus: locationFileStatus}
-		c.Insert(state)
+		state := locationState{LocationName: locationName, LocationFileStatus: locationFileStatus}
+		err := c.Insert(state)
+		if err != nil {
+			log.Println("Failed to insert location state data with the following error: ", err)
+		}
 	}
 }
