@@ -6,8 +6,8 @@ import (
 )
 
 type Store interface {
-	getLocationStateRecent(locationName string) map[string]string
-	setLocationStateRecent(locationName string, locationFileStatus map[string]string)
+	getLocationStateRecent(locationName string) (map[string]string, error)
+	setLocationStateRecent(locationName string, locationFileStatus map[string]string) error
 }
 
 type mongoStore struct {
@@ -23,14 +23,17 @@ func NewMongoStore(mongo *mgo.Database) Store {
 	return &mongoStore{mongo}
 }
 
-func (s mongoStore) getLocationStateRecent(locationName string) map[string]string {
+func (s mongoStore) getLocationStateRecent(locationName string) (map[string]string, error) {
 	c := s.mongo.C("LocationStateRecent")
 	var locState locationState
-	c.FindId(locationName).One(&locState)
-	return locState.LocationFileStatus
+	err := c.FindId(locationName).One(&locState)
+	if err != nil {
+		return nil, err
+	}
+	return locState.LocationFileStatus, nil
 }
 
-func (s mongoStore) setLocationStateRecent(locationName string, locationFileStatus map[string]string) {
+func (s mongoStore) setLocationStateRecent(locationName string, locationFileStatus map[string]string) error {
 	log.Println("Storing/updating recent location state")
 	c := s.mongo.C("LocationStateRecent")
 
@@ -38,13 +41,17 @@ func (s mongoStore) setLocationStateRecent(locationName string, locationFileStat
 	err := c.FindId(locationName).One(&locState)
 	if err == nil {
 		locState.LocationFileStatus = locationFileStatus
-		c.UpdateId(locationName, locState.LocationFileStatus)
+		 err := c.UpdateId(locationName, locState.LocationFileStatus)
+		 if err != nil {
+		 	return err
+		 }
 	} else {
 		log.Print(err)
 		state := locationState{LocationName: locationName, LocationFileStatus: locationFileStatus}
 		err := c.Insert(state)
 		if err != nil {
-			log.Println("Failed to insert location state data with the following error: ", err)
+			return err
 		}
 	}
+	return nil
 }

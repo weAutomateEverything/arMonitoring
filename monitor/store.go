@@ -7,7 +7,7 @@ import (
 )
 
 type Store interface {
-	addGlobalStateDaily(globalFileStatus map[string]map[string]string)
+	addGlobalStateDaily(globalFileStatus map[string]map[string]string) error
 }
 
 type mongoStore struct {
@@ -23,12 +23,13 @@ func NewMongoStore(mongo *mgo.Database) Store {
 	return &mongoStore{mongo}
 }
 
-func (s mongoStore) addGlobalStateDaily(globalFileStatus map[string]map[string]string) {
+func (s mongoStore) addGlobalStateDaily(globalFileStatus map[string]map[string]string) error{
 	log.Println("Storing daily global state")
 	c := s.mongo.C("GlobalStateDaily")
 	stateItem := globalState{LastUpdate: time.Now(), GlobalFileStatus: globalFileStatus}
 	err := c.Insert(stateItem)
 	if err != nil {
-		log.Println("Failed to insert global state data with the following error: ", err)
+		return err
 	}
+	return nil
 }

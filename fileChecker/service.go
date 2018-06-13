@@ -33,8 +33,13 @@ func NewFileChecker(store Store, name, mountpath string, files ...string) Servic
 		store:        store,
 	}
 
-	if store.getLocationStateRecent(name) != nil {
-		s.fileStatus = store.getLocationStateRecent(name)
+	storeContents, err := store.getLocationStateRecent(name)
+	if err != nil {
+		log.Println("Failed to access persistance layer with the following error: ", err)
+	}
+
+	if storeContents != nil {
+		s.fileStatus = storeContents
 	}
 
 	go func() {
@@ -182,7 +187,7 @@ func expectedFileArivalTime(file string) time.Time {
 		"MUL":                               "01:30:00",
 		"RECON_REPORT":                      "05:30:00",
 		"SE":                                "01:30:00",
-		"SPTLSB":                        	 "21:00:00",
+		"SPTLSB":                            "21:00:00",
 		"SR00001":                           "01:30:00",
 		"TRANS_INPUT_LIST_":                 "05:30:00",
 		"TXN":                               "01:30:00",
