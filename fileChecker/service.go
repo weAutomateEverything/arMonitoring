@@ -175,8 +175,6 @@ func convertTime(unconvertedTime string) time.Time {
 
 func (s *service) getListOfFilesInPath(path string) ([]string, error) {
 
-	//isShareNotAccessable := isSharFolderEmpty(path)
-
 	dir, err := os.Open(path)
 	if err != nil {
 		return nil, err
