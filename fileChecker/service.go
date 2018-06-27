@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"io"
 )
 
 type Service interface {
@@ -21,7 +22,7 @@ type service struct {
 	files          []string
 	backDatedFiles []string
 	fileStatus     map[string]string
-  store        Store
+	store          Store
 }
 
 func NewFileChecker(store Store, name, mountpath string, bdFiles []string, files ...string) Service {
@@ -32,8 +33,8 @@ func NewFileChecker(store Store, name, mountpath string, bdFiles []string, files
 		files:          files,
 		backDatedFiles: bdFiles,
 		fileStatus:     make(map[string]string),
-    store:        store,
-  }
+		store:          store,
+	}
 
 	storeContents, err := store.getLocationStateRecent(name)
 	if err != nil {
@@ -176,6 +177,10 @@ func (s *service) getListOfFilesInPath(path string) ([]string, error) {
 
 	dir, err := os.Open(path)
 	if err != nil {
+		return nil, err
+	}
+	_, err = dir.Readdirnames(1)
+	if err == io.EOF {
 		return nil, err
 	}
 
