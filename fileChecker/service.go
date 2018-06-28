@@ -75,7 +75,7 @@ func (s *service) setValues(name, mountpath string, bdFiles []string, files []st
 		notAccessableOrEmpty := isShareFolderEmpty(mountpath)
 
 		for _, x := range files {
-			if notAccessableOrEmpty{
+			if notAccessableOrEmpty {
 				for _, file := range files {
 					s.fileStatus[file] = "unaccessable"
 				}
@@ -139,9 +139,21 @@ func (s *service) setFileStatus(dirPath, fileContains string, bdFiles []string) 
 		contains := strings.Contains(file, fileContains)
 
 		if backdated && contains {
-			return response(file, yesterdayDate, convertedTime, expectedTime), nil
+			recent := strings.Contains(file, yesterdayDate)
+			if recent && convertedTime.After(expectedTime) {
+				return "late", nil
+			}
+			if recent && convertedTime.Before(expectedTime) {
+				return "received", nil
+			}
 		} else if contains {
-			return response(file, currentDate, convertedTime, expectedTime), nil
+			recent := strings.Contains(file, currentDate)
+			if recent && convertedTime.After(expectedTime) {
+				return "late", nil
+			}
+			if recent && convertedTime.Before(expectedTime) {
+				return "received", nil
+			}
 		}
 	}
 	return "notreceived", nil
@@ -159,18 +171,6 @@ func isShareFolderEmpty(path string) bool {
 	defer dir.Close()
 
 	return false
-}
-
-func response(file, date string, convertedTime, expectedTime time.Time) string {
-	recent := strings.Contains(file, date)
-
-	if recent && convertedTime.After(expectedTime) {
-		return "late"
-	}
-	if recent && convertedTime.Before(expectedTime) {
-		return "received"
-	}
-	return "notreceived"
 }
 
 func checkIfFileIsBackDated(file string, bdFiles []string) bool {
