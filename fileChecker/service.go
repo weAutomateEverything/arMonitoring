@@ -72,14 +72,18 @@ func (s *service) setValues(name, mountpath string, bdFiles []string, files []st
 	for true {
 		log.Println(fmt.Sprintf("Now accessing %s share", name))
 
-		accessable := isShareFolderEmpty(mountpath)
+		notAccessableOrEmpty := isShareFolderEmpty(mountpath)
 
 		for _, x := range files {
-			value, err := s.setFileStatus(mountpath, x, bdFiles)
-			if err != nil || accessable {
+			if notAccessableOrEmpty{
 				for _, file := range files {
 					s.fileStatus[file] = "unaccessable"
 				}
+				continue
+			}
+			value, err := s.setFileStatus(mountpath, x, bdFiles)
+			if err != nil {
+				log.Println(err)
 			}
 			if _, ok := s.fileStatus[x]; ok {
 				if s.fileStatus[x] == "unaccessable" {
@@ -129,14 +133,14 @@ func (s *service) setFileStatus(dirPath, fileContains string, bdFiles []string) 
 
 	for _, file := range fileList {
 
-		backdated := checkBackDated(file, bdFiles)
+		backdated := checkIfFileIsBackDated(file, bdFiles)
 
 		expectedTime := expectedFileArivalTime(fileContains)
-		cont := strings.Contains(file, fileContains)
+		contains := strings.Contains(file, fileContains)
 
-		if backdated && cont {
+		if backdated && contains {
 			return response(file, yesterdayDate, convertedTime, expectedTime), nil
-		} else if cont {
+		} else if contains {
 			return response(file, currentDate, convertedTime, expectedTime), nil
 		}
 	}
@@ -169,15 +173,17 @@ func response(file, date string, convertedTime, expectedTime time.Time) string {
 	return "notreceived"
 }
 
-//Check if a file has to be back dated
-func checkBackDated(file string, bdFiles []string) bool {
+func checkIfFileIsBackDated(file string, bdFiles []string) bool {
+
+	var fileIsBackdated bool
 
 	for _, bdfile := range bdFiles {
 		if strings.Contains(file, bdfile) {
-			return true
+			fileIsBackdated = true
+			continue
 		}
 	}
-	return false
+	return fileIsBackdated
 }
 
 func convertTime(unconvertedTime string) time.Time {
