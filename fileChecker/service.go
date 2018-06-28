@@ -3,11 +3,11 @@ package fileChecker
 import (
 	"fmt"
 	"github.com/matryer/try"
+	"io"
 	"log"
 	"os"
 	"strings"
 	"time"
-	"io"
 )
 
 type Service interface {
@@ -72,9 +72,11 @@ func (s *service) setValues(name, mountpath string, bdFiles []string, files []st
 	for true {
 		log.Println(fmt.Sprintf("Now accessing %s share", name))
 
+		accessable := isShareFolderEmpty(mountpath)
+
 		for _, x := range files {
 			value, err := s.setFileStatus(mountpath, x, bdFiles)
-			if err != nil {
+			if err != nil || accessable {
 				for _, file := range files {
 					s.fileStatus[file] = "unaccessable"
 				}
@@ -141,6 +143,20 @@ func (s *service) setFileStatus(dirPath, fileContains string, bdFiles []string) 
 	return "notreceived", nil
 }
 
+func isShareFolderEmpty(path string) bool {
+	dir, err := os.Open(path)
+	if err != nil {
+		return true
+	}
+	_, err = dir.Readdirnames(1)
+	if err == io.EOF {
+		return true
+	}
+	defer dir.Close()
+
+	return false
+}
+
 func response(file, date string, convertedTime, expectedTime time.Time) string {
 	recent := strings.Contains(file, date)
 
@@ -177,10 +193,6 @@ func (s *service) getListOfFilesInPath(path string) ([]string, error) {
 
 	dir, err := os.Open(path)
 	if err != nil {
-		return nil, err
-	}
-	_, err = dir.Readdirnames(1)
-	if err == io.EOF {
 		return nil, err
 	}
 
