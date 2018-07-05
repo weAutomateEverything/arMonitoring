@@ -24,6 +24,8 @@ func NewService(store Store, fileStore fileChecker.Store) Service {
 	backDatedFiles := []string{"GL", "SE", "TXN", "CGNI", "INT00001", "INT00003", "INT00007", "SR00001", "MUL00002", "MUL00004"}
 	afterHoursFiles:= []string{ ".001", ".002", ".003", ".004", ".005", ".006", "SPTLSB"}
 
+	s.resetValues()
+
 	//Zimbabwe
 	zimbabwe := fileChecker.NewFileChecker(fileStore, "Zimbabwe", "/mnt/zimbabwe", backDatedFiles, afterHoursFiles, append(common)...)
 	s.globalStatus = append(s.globalStatus, zimbabwe)
@@ -66,12 +68,12 @@ func NewService(store Store, fileStore fileChecker.Store) Service {
 }
 
 func (s *service) resetValues() {
-	log.Println("Midnight reset initiated")
+	log.Println("Global reset initiated")
 
 	for _, loc := range s.globalStatus {
 		loc.Reset()
 	}
-	log.Println("Midnight reset completed")
+	log.Println("Global reset completed")
 }
 
 func (s *service) StatusResults() map[string]map[string]string {
