@@ -7,7 +7,9 @@ import (
 
 type Store interface {
 	getLocationStateRecent(locationName string) (map[string]string, error)
+	getLocationStatePreviousDay(locationName string) (map[string]string, error)
 	setLocationStateRecent(locationName string, locationFileStatus map[string]string) error
+	setLocationStatePreviousDay(locationName string, locationFileStatus map[string]string) error
 }
 
 type mongoStore struct {
@@ -33,9 +35,34 @@ func (s mongoStore) getLocationStateRecent(locationName string) (map[string]stri
 	return locState.LocationFileStatus, nil
 }
 
+func (s mongoStore) getLocationStatePreviousDay(locationName string) (map[string]string, error) {
+	c := s.mongo.C("LocationStatePreviousDay")
+	var locState locationState
+	err := c.FindId(locationName).One(&locState)
+	if err != nil {
+		return nil, err
+	}
+	return locState.LocationFileStatus, nil
+}
+
 func (s mongoStore) setLocationStateRecent(locationName string, locationFileStatus map[string]string) error {
 	log.Println("Storing/updating recent location state")
 	c := s.mongo.C("LocationStateRecent")
+
+	var locState locationState
+	err := c.FindId(locationName).One(&locState)
+	if err == nil {
+		locState.LocationFileStatus = locationFileStatus
+		return c.UpdateId(locationName, locState.LocationFileStatus)
+	}
+	log.Print(err)
+	state := locationState{LocationName: locationName, LocationFileStatus: locationFileStatus}
+	return c.Insert(state)
+}
+
+func (s mongoStore) setLocationStatePreviousDay(locationName string, locationFileStatus map[string]string) error {
+	log.Println("Storing/updating recent location state for previous day")
+	c := s.mongo.C("LocationStatePreviousDay")
 
 	var locState locationState
 	err := c.FindId(locationName).One(&locState)

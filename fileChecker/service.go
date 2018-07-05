@@ -2,6 +2,7 @@ package fileChecker
 
 import (
 	"fmt"
+	"github.com/jasonlvhit/gocron"
 	"github.com/matryer/try"
 	"io"
 	"log"
@@ -17,23 +18,25 @@ type Service interface {
 }
 
 type service struct {
-	locationName   string
-	mountPath      string
-	files          []string
-	backDatedFiles []string
-	fileStatus     map[string]string
-	store          Store
+	locationName    string
+	mountPath       string
+	files           []string
+	backDatedFiles  []string
+	afterHoursFiles []string
+	fileStatus      map[string]string
+	store           Store
 }
 
-func NewFileChecker(store Store, name, mountpath string, bdFiles []string, files ...string) Service {
+func NewFileChecker(store Store, name, mountpath string, bdFiles []string, aHFiles []string, files ...string) Service {
 
 	s := &service{
-		locationName:   name,
-		mountPath:      mountpath,
-		files:          files,
-		backDatedFiles: bdFiles,
-		fileStatus:     make(map[string]string),
-		store:          store,
+		locationName:    name,
+		mountPath:       mountpath,
+		files:           files,
+		backDatedFiles:  bdFiles,
+		afterHoursFiles: aHFiles,
+		fileStatus:      make(map[string]string),
+		store:           store,
 	}
 
 	storeContents, err := store.getLocationStateRecent(name)
@@ -45,8 +48,21 @@ func NewFileChecker(store Store, name, mountpath string, bdFiles []string, files
 		s.fileStatus = storeContents
 	}
 
+	resetAfterHoursFiles := gocron.NewScheduler()
+	setAfterHoursFiles := gocron.NewScheduler()
+
 	go func() {
-		s.setValues(s.locationName, s.mountPath, s.backDatedFiles, s.files)
+		resetAfterHoursFiles.Every(1).Day().At("05:00").Do(s.resetAfterHoursValues)
+		<-resetAfterHoursFiles.Start()
+	}()
+
+	go func() {
+		setAfterHoursFiles.Every(1).Day().At("11:55").Do(s.storeLocationStatePreviousDay)
+		<-setAfterHoursFiles.Start()
+	}()
+
+	go func() {
+		s.setValues(s.locationName, s.mountPath, s.backDatedFiles, s.afterHoursFiles, s.files, s.store)
 	}()
 
 	return s
@@ -67,7 +83,20 @@ func (s *service) Reset() {
 	}
 }
 
-func (s *service) setValues(name, mountpath string, bdFiles []string, files []string) {
+func (s *service) resetAfterHoursValues() {
+	log.Println("After hours reset initiatedd")
+
+	for _, loc := range s.afterHoursFiles {
+		s.fileStatus[loc] = "unaccessable"
+	}
+	log.Println("After hours reset completed")
+}
+
+func (s *service) storeLocationStatePreviousDay(name string, fileStatus map[string]string) {
+	s.store.setLocationStatePreviousDay(name, fileStatus)
+}
+
+func (s *service) setValues(name, mountpath string, bdFiles []string, aHFiles []string, files []string, store Store) {
 
 	for true {
 		log.Println(fmt.Sprintf("Now accessing %s share", name))
@@ -81,10 +110,11 @@ func (s *service) setValues(name, mountpath string, bdFiles []string, files []st
 				}
 				continue
 			}
-			value, err := s.setFileStatus(mountpath, x, bdFiles)
+			value, err := s.setFileStatus(name, mountpath, x, bdFiles, aHFiles, store)
 			if err != nil {
 				log.Println(err)
 			}
+			// Test for existance of key in map
 			if _, ok := s.fileStatus[x]; ok {
 				if s.fileStatus[x] == "unaccessable" {
 					s.fileStatus[x] = "notreceived"
@@ -106,7 +136,7 @@ func (s *service) storeLocationStateRecent(name string, fileStatus map[string]st
 	s.store.setLocationStateRecent(name, fileStatus)
 }
 
-func (s *service) setFileStatus(dirPath, fileContains string, bdFiles []string) (string, error) {
+func (s *service) setFileStatus(name, dirPath, fileContains string, bdFiles []string, aHFiles []string, store Store) (string, error) {
 
 	var fileList []string
 
@@ -134,11 +164,20 @@ func (s *service) setFileStatus(dirPath, fileContains string, bdFiles []string) 
 	for _, file := range fileList {
 
 		backdated := checkIfFileIsBackDated(file, bdFiles)
+		afterHours := checkIfFileIsAfterHours(file, aHFiles)
 
 		expectedTime := expectedFileArivalTime(fileContains)
 		contains := strings.Contains(file, fileContains)
 
-		if backdated && contains {
+		if afterHours && contains {
+			status, err := store.getLocationStatePreviousDay(name)
+			if err != nil {
+				log.Printf("Previous day's status for the following file was unsuccessfully retreived from database: %v", name)
+			}
+			log.Print(status[file])
+			return status[file], nil
+
+		} else if backdated && contains {
 			recent := strings.Contains(file, yesterdayDate)
 			if recent && convertedTime.After(expectedTime) {
 				return "late", nil
@@ -184,6 +223,19 @@ func checkIfFileIsBackDated(file string, bdFiles []string) bool {
 		}
 	}
 	return fileIsBackdated
+}
+
+func checkIfFileIsAfterHours(file string, bdFiles []string) bool {
+
+	var fileIsAfterHours bool
+
+	for _, bdfile := range bdFiles {
+		if strings.Contains(file, bdfile) {
+			fileIsAfterHours = true
+			continue
+		}
+	}
+	return fileIsAfterHours
 }
 
 func convertTime(unconvertedTime string) time.Time {
