@@ -22,30 +22,31 @@ func NewService(store Store, fileStore fileChecker.Store) Service {
 	log.Println("File arrival confirmation commencing")
 	common := []string{"SE", "GL", "TXN", "DA", "MS", "EP747", "VTRAN", "VOUT", "VISA_OUTGOING_MONET_TRANS_REPORT", "VISA_INCOMING_FILES_SUMMARY_REPORT", "TRANS_INPUT_LIST_", "VISA_INCOMING_MONET_TRANS_REPORT", "VISA_OUTGOING_FILES_SUMMARY_REPORT", "MC_INCOMING_MONET_TRANS_REPORT", "MC_OUTGOING_MONET_TRANS_REPORT", "RECON_REPORT", "MERCH_REJ_TRANS", "MC_OUTGOING_FILES_SUMMARY_REPORT", "MASTERCARD_ACKNOWLEDGEMENT_REPORT", "MC_INCOMING_FILES_SUMMARY_REPORT", ".001", ".002", ".003", ".004", ".005", ".006", "SPTLSB"}
 	backDatedFiles := []string{"GL", "SE", "TXN", "CGNI", "INT00001", "INT00003", "INT00007", "SR00001", "MUL00002", "MUL00004"}
+	afterHoursFiles:= []string{ ".001", ".002", ".003", ".004", ".005", ".006", "SPTLSB"}
 
 	//Zimbabwe
-	zimbabwe := fileChecker.NewFileChecker(fileStore, "Zimbabwe", "/mnt/zimbabwe", backDatedFiles, append(common)...)
+	zimbabwe := fileChecker.NewFileChecker(fileStore, "Zimbabwe", "/mnt/zimbabwe", backDatedFiles, afterHoursFiles, append(common)...)
 	s.globalStatus = append(s.globalStatus, zimbabwe)
 	//Zambia
-	zambia := fileChecker.NewFileChecker(fileStore, "Zambia", "/mnt/zambiaprod", backDatedFiles, append(common)...)
+	zambia := fileChecker.NewFileChecker(fileStore, "Zambia", "/mnt/zambiaprod", backDatedFiles, afterHoursFiles, append(common)...)
 	s.globalStatus = append(s.globalStatus, zambia)
 	//Ghana
-	ghana := fileChecker.NewFileChecker(fileStore, "Ghana", "/mnt/ghana", backDatedFiles, append(common, "MUL")...)
+	ghana := fileChecker.NewFileChecker(fileStore, "Ghana", "/mnt/ghana", backDatedFiles, afterHoursFiles, append(common, "MUL")...)
 	s.globalStatus = append(s.globalStatus, ghana)
 	//GhanaUSD
-	ghanausd := fileChecker.NewFileChecker(fileStore, "GhanaUSD", "/mnt/ghanausd", backDatedFiles, append(common)...)
+	ghanausd := fileChecker.NewFileChecker(fileStore, "GhanaUSD", "/mnt/ghanausd", backDatedFiles, afterHoursFiles, append(common)...)
 	s.globalStatus = append(s.globalStatus, ghanausd)
 	//Botswana
-	botswana := fileChecker.NewFileChecker(fileStore, "Botswana", "/mnt/botswana", backDatedFiles, append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_")...)
+	botswana := fileChecker.NewFileChecker(fileStore, "Botswana", "/mnt/botswana", backDatedFiles, afterHoursFiles, append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_")...)
 	s.globalStatus = append(s.globalStatus, botswana)
 	//Namibia
-	namibia := fileChecker.NewFileChecker(fileStore, "Namibia", "/mnt/namibia", backDatedFiles, append(common, "MUL", "INT00001", "INT00003", "INT00007", "SR00001", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI")...)
+	namibia := fileChecker.NewFileChecker(fileStore, "Namibia", "/mnt/namibia", backDatedFiles, afterHoursFiles, append(common, "MUL", "INT00001", "INT00003", "INT00007", "SR00001", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI")...)
 	s.globalStatus = append(s.globalStatus, namibia)
 	//Malawi
-	malawi := fileChecker.NewFileChecker(fileStore, "Malawi", "/mnt/malawi", backDatedFiles, append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI")...)
+	malawi := fileChecker.NewFileChecker(fileStore, "Malawi", "/mnt/malawi", backDatedFiles, afterHoursFiles, append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI")...)
 	s.globalStatus = append(s.globalStatus, malawi)
 	//Kenya
-	kenya := fileChecker.NewFileChecker(fileStore, "Kenya", "/mnt/kenya", backDatedFiles, append(common)...)
+	kenya := fileChecker.NewFileChecker(fileStore, "Kenya", "/mnt/kenya", backDatedFiles, afterHoursFiles, append(common)...)
 	s.globalStatus = append(s.globalStatus, kenya)
 
 	resetsched := gocron.NewScheduler()
