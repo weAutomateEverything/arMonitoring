@@ -25,31 +25,32 @@ func NewService(store Store, fileStore fileChecker.Store) Service {
 	afterHoursFiles:= []string{ ".001", ".002", ".003", ".004", ".005", ".006", "SPTLSB"}
 
 	//Zimbabwe
-	zimbabwe := fileChecker.NewFileChecker(fileStore, "Zimbabwe", "/mnt/zimbabwe", backDatedFiles, append(common)...)
+	zimbabwe := fileChecker.NewFileChecker(fileStore, "Zimbabwe", "/mnt/zimbabwe", backDatedFiles, afterHoursFiles, append(common)...)
 	s.globalStatus = append(s.globalStatus, zimbabwe)
 	//Zambia
-	zambia := fileChecker.NewFileChecker(fileStore, "Zambia", "/mnt/zambiaprod", backDatedFiles, append(common)...)
+	zambia := fileChecker.NewFileChecker(fileStore, "Zambia", "/mnt/zambiaprod", backDatedFiles, afterHoursFiles, append(common)...)
 	s.globalStatus = append(s.globalStatus, zambia)
 	//Ghana
-	ghana := fileChecker.NewFileChecker(fileStore, "Ghana", "/mnt/ghana", backDatedFiles, append(common, "MUL")...)
+	ghana := fileChecker.NewFileChecker(fileStore, "Ghana", "/mnt/ghana", backDatedFiles, afterHoursFiles, append(common, "MUL")...)
 	s.globalStatus = append(s.globalStatus, ghana)
 	//GhanaUSD
-	ghanausd := fileChecker.NewFileChecker(fileStore, "GhanaUSD", "/mnt/ghanausd", backDatedFiles, append(common)...)
+	ghanausd := fileChecker.NewFileChecker(fileStore, "GhanaUSD", "/mnt/ghanausd", backDatedFiles, afterHoursFiles, append(common)...)
 	s.globalStatus = append(s.globalStatus, ghanausd)
 	//Botswana
-	botswana := fileChecker.NewFileChecker(fileStore, "Botswana", "/mnt/botswana", backDatedFiles, append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_")...)
+	botswana := fileChecker.NewFileChecker(fileStore, "Botswana", "/mnt/botswana", backDatedFiles, afterHoursFiles, append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_")...)
 	s.globalStatus = append(s.globalStatus, botswana)
 	//Namibia
-	namibia := fileChecker.NewFileChecker(fileStore, "Namibia", "/mnt/namibia", backDatedFiles, append(common, "MUL", "INT00001", "INT00003", "INT00007", "SR00001", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI")...)
+	namibia := fileChecker.NewFileChecker(fileStore, "Namibia", "/mnt/namibia", backDatedFiles, afterHoursFiles, append(common, "MUL", "INT00001", "INT00003", "INT00007", "SR00001", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI")...)
 	s.globalStatus = append(s.globalStatus, namibia)
 	//Malawi
-	malawi := fileChecker.NewFileChecker(fileStore, "Malawi", "/mnt/malawi", backDatedFiles, append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI")...)
+	malawi := fileChecker.NewFileChecker(fileStore, "Malawi", "/mnt/malawi", backDatedFiles, afterHoursFiles, append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI")...)
 	s.globalStatus = append(s.globalStatus, malawi)
 	//Kenya
-	kenya := fileChecker.NewFileChecker(fileStore, "Kenya", "/mnt/kenya", backDatedFiles, append(common)...)
+	kenya := fileChecker.NewFileChecker(fileStore, "Kenya", "/mnt/kenya", backDatedFiles, afterHoursFiles, append(common)...)
 	s.globalStatus = append(s.globalStatus, kenya)
 
 	resetsched := gocron.NewScheduler()
+	afterHoursResetsched := gocron.NewScheduler()
 	globalStateDailySched := gocron.NewScheduler()
 
 	go func() {
@@ -58,7 +59,12 @@ func NewService(store Store, fileStore fileChecker.Store) Service {
 	}()
 
 	go func() {
-		globalStateDailySched.Every(1).Day().At("11:55").Do(s.storeGlobalStateDaily)
+		afterHoursResetsched.Every(1).Day().At("17:00").Do(s.resetAfterHoursValues)
+		<-afterHoursResetsched.Start()
+	}()
+
+	go func() {
+		globalStateDailySched.Every(1).Day().At("23:55").Do(s.storeGlobalStateDaily)
 		<-globalStateDailySched.Start()
 	}()
 
@@ -66,12 +72,21 @@ func NewService(store Store, fileStore fileChecker.Store) Service {
 }
 
 func (s *service) resetValues() {
-	log.Println("Global reset initiated")
+	log.Println("Midnight reset initiated")
 
 	for _, loc := range s.globalStatus {
 		loc.Reset()
 	}
-	log.Println("Global reset completed")
+	log.Println("Midnight reset completed")
+}
+
+func (s *service) resetAfterHoursValues() {
+	log.Println("After Hours reset initiated")
+
+	for _, loc := range s.globalStatus {
+		loc.ResetAfterHours()
+	}
+	log.Println("After Hours completed")
 }
 
 func (s *service) StatusResults() map[string]map[string]string {

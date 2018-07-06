@@ -14,6 +14,7 @@ type Service interface {
 	GetValues() map[string]string
 	GetLocationName() string
 	Reset()
+	ResetAfterHours()
 }
 
 type service struct {
@@ -21,17 +22,19 @@ type service struct {
 	mountPath       string
 	files           []string
 	backDatedFiles  []string
+	afterHoursFiles []string
 	fileStatus      map[string]string
 	store           Store
 }
 
-func NewFileChecker(store Store, name, mountpath string, bdFiles []string, files ...string) Service {
+func NewFileChecker(store Store, name, mountpath string, bdFiles []string, aHFiles []string, files ...string) Service {
 
 	s := &service{
 		locationName:    name,
 		mountPath:       mountpath,
 		files:           files,
 		backDatedFiles:  bdFiles,
+		afterHoursFiles: aHFiles,
 		fileStatus:      make(map[string]string),
 		store:           store,
 	}
@@ -63,6 +66,16 @@ func (s *service) GetLocationName() string {
 func (s *service) Reset() {
 	log.Printf("Resetting %s", s.locationName)
 	for k := range s.fileStatus {
+		if !checkIfFileIsAfterHours(k, s.afterHoursFiles) {
+		}
+		s.fileStatus[k] = "notreceived"
+	}
+}
+func (s *service) ResetAfterHours() {
+	log.Printf("Resetting %s", s.locationName)
+	for k := range s.fileStatus {
+		if checkIfFileIsAfterHours(k, s.afterHoursFiles) {
+		}
 		s.fileStatus[k] = "notreceived"
 	}
 }
@@ -139,7 +152,7 @@ func (s *service) setFileStatus(name, dirPath, fileContains string, bdFiles []st
 		expectedTime := expectedFileArivalTime(fileContains)
 		contains := strings.Contains(file, fileContains)
 
-		 if backdated && contains {
+		if backdated && contains {
 			recent := strings.Contains(file, yesterdayDate)
 			if recent && convertedTime.After(expectedTime) {
 				return "late", nil
@@ -185,6 +198,19 @@ func checkIfFileIsBackDated(file string, bdFiles []string) bool {
 		}
 	}
 	return fileIsBackdated
+}
+
+func checkIfFileIsAfterHours(file string, aHFiles []string) bool {
+
+	var fileIsAfterHours bool
+
+	for _, aHFile := range aHFiles {
+		if strings.Contains(file, aHFile) {
+			fileIsAfterHours = true
+			continue
+		}
+	}
+	return fileIsAfterHours
 }
 
 func convertTime(unconvertedTime string) time.Time {
