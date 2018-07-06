@@ -67,16 +67,16 @@ func (s *service) Reset() {
 	log.Printf("Resetting %s", s.locationName)
 	for k := range s.fileStatus {
 		if !checkIfFileIsAfterHours(k, s.afterHoursFiles) {
+			s.fileStatus[k] = "notreceived"
 		}
-		s.fileStatus[k] = "notreceived"
 	}
 }
 func (s *service) ResetAfterHours() {
 	log.Printf("Resetting %s", s.locationName)
 	for k := range s.fileStatus {
 		if checkIfFileIsAfterHours(k, s.afterHoursFiles) {
+			s.fileStatus[k] = "notreceived"
 		}
-		s.fileStatus[k] = "notreceived"
 	}
 }
 
