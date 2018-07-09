@@ -15,6 +15,10 @@ type Service interface {
 	GetLocationName() string
 	Reset()
 	ResetAfterHours()
+	setValues(name, mountpath string, bdFiles []string, files []string, store Store)
+	storeLocationStateRecent(name string, fileStatus map[string]string)
+	setFileStatus(name, dirPath, fileContains string, bdFiles []string, store Store) (string, error)
+	getListOfFilesInPath(path string) ([]string, error)
 }
 
 type service struct {

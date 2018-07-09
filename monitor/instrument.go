@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"github.com/go-kit/kit/metrics"
+	"time"
 )
 
 type instrumentingService struct {
@@ -18,18 +19,35 @@ func NewInstrumentService(counter metrics.Counter, latency metrics.Histogram, s 
 	}
 }
 
-//func (s *instrumentingService) ConfirmZimbabweFileAvailability() {
-//	defer func(begin time.Time) {
-//		s.requestCount.With("method", "ConfirmUgandaFileAvailability").Add(1)
-//		s.requestLatency.With("method", "ConfirmUgandaFileAvailability").Observe(time.Since(begin).Seconds())
-//	}(time.Now())
-//	s.Service.ConfirmZimbabweFileAvailability()
-//}
-//
-//func (s *instrumentingService) GetFilesInPath(path string) ([]string, error) {
-//	defer func(begin time.Time) {
-//		s.requestCount.With("method", "GetFilesInPath").Add(1)
-//		s.requestLatency.With("method", "GetFilesInPath").Observe(time.Since(begin).Seconds())
-//	}(time.Now())
-//	return s.Service.GetFilesInPath(path)
-//}
+func (s *instrumentingService) StatusResults() map[string]map[string]string{
+	defer func(begin time.Time) {
+		s.requestCount.With("method", "StatusResults").Add(1)
+		s.requestLatency.With("method", "StatusResults").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+	return s.Service.StatusResults()
+}
+
+func (s *instrumentingService) resetValues() {
+	defer func(begin time.Time) {
+		s.requestCount.With("method", "resetValues").Add(1)
+		s.requestLatency.With("method", "resetValues").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+	s.Service.resetValues()
+}
+
+func (s *instrumentingService) resetAfterHoursValues() {
+	defer func(begin time.Time) {
+		s.requestCount.With("method", "resetAfterHoursValues").Add(1)
+		s.requestLatency.With("method", "resetAfterHoursValues").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+	s.Service.resetAfterHoursValues()
+}
+
+func (s *instrumentingService) storeGlobalStateDaily() {
+	defer func(begin time.Time) {
+		s.requestCount.With("method", "storeGlobalStateDaily").Add(1)
+		s.requestLatency.With("method", "storeGlobalStateDaily").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+	s.Service.storeGlobalStateDaily()
+}
+
