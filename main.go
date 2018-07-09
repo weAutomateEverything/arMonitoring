@@ -31,17 +31,17 @@ func main() {
 	dailyStore := monitor.NewMongoStore(db)
 	recentStore := fileChecker.NewMongoStore(db)
 
-	mon := monitor.NewService(dailyStore, recentStore)
+	mon := monitor.NewService(fieldKeys, logger, dailyStore, recentStore)
 	mon = monitor.NewLoggingService(log.With(logger, "component", "fileMonitor"), mon)
 	mon = monitor.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace: "api",
-		Subsystem: "fileMonitor",
+		Subsystem: "MonitorService",
 		Name:      "request_count",
 		Help:      "Number of requests received.",
 	}, fieldKeys),
 		kitprometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
 			Namespace: "api",
-			Subsystem: "fileMonitor",
+			Subsystem: "MonitorService",
 			Name:      "request_latency_microseconds",
 			Help:      "Total duration of requests in microseconds.",
 		}, fieldKeys), mon)
