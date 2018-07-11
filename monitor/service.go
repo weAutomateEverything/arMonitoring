@@ -166,6 +166,40 @@ func NewService(fieldKeys []string, logger log.Logger, store Store, fileStore fi
 		}, fieldKeys), kenya)
 	s.globalStatus = append(s.globalStatus, kenya)
 
+	//Lesotho
+	lesotho := fileChecker.NewFileChecker(fileStore, "Lesotho", "/mnt/lesotho", backDatedFiles, afterHoursFiles, append(common)...)
+	lesotho = fileChecker.NewLoggingService(log.With(logger, "component", "lesothoFileChecker"), lesotho)
+	lesotho = fileChecker.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
+		Namespace: "api",
+		Subsystem: "lesothoFileChecker",
+		Name:      "request_count",
+		Help:      "Number of requests received.",
+	}, fieldKeys),
+		kitprometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
+			Namespace: "api",
+			Subsystem: "lesothoFileChecker",
+			Name:      "request_latency_microseconds",
+			Help:      "Total duration of requests in microseconds.",
+		}, fieldKeys), lesotho)
+	s.globalStatus = append(s.globalStatus, lesotho)
+
+	//Swaziland
+	swaziland := fileChecker.NewFileChecker(fileStore, "Swaziland", "/mnt/swaziland", backDatedFiles, afterHoursFiles, append(common)...)
+	swaziland = fileChecker.NewLoggingService(log.With(logger, "component", "swazilandFileChecker"), swaziland)
+	swaziland = fileChecker.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
+		Namespace: "api",
+		Subsystem: "swazilandFileChecker",
+		Name:      "request_count",
+		Help:      "Number of requests received.",
+	}, fieldKeys),
+		kitprometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
+			Namespace: "api",
+			Subsystem: "swazilandFileChecker",
+			Name:      "request_latency_microseconds",
+			Help:      "Total duration of requests in microseconds.",
+		}, fieldKeys), swaziland)
+	s.globalStatus = append(s.globalStatus, swaziland)
+
 	resetsched := gocron.NewScheduler()
 	afterHoursResetsched := gocron.NewScheduler()
 	globalStateDailySched := gocron.NewScheduler()
