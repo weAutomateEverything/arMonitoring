@@ -167,7 +167,7 @@ func NewService(fieldKeys []string, logger log.Logger, store Store, fileStore fi
 	s.globalStatus = append(s.globalStatus, kenya)
 
 	//Lesotho
-	lesotho := fileChecker.NewFileChecker(fileStore, "Lesotho", "/mnt/lesotho", backDatedFiles, afterHoursFiles, append(common)...)
+	lesotho := fileChecker.NewFileChecker(fileStore, "Lesotho", "/mnt/lesotho", backDatedFiles, afterHoursFiles, append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI", "VTRAN", "VOUT", ".001", ".002", ".003", ".004", ".005", ".006")...)
 	lesotho = fileChecker.NewLoggingService(log.With(logger, "component", "lesothoFileChecker"), lesotho)
 	lesotho = fileChecker.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace: "api",
@@ -184,7 +184,7 @@ func NewService(fieldKeys []string, logger log.Logger, store Store, fileStore fi
 	s.globalStatus = append(s.globalStatus, lesotho)
 
 	//Swaziland
-	swaziland := fileChecker.NewFileChecker(fileStore, "Swaziland", "/mnt/swaziland", backDatedFiles, afterHoursFiles, append(common)...)
+	swaziland := fileChecker.NewFileChecker(fileStore, "Swaziland", "/mnt/swaziland", backDatedFiles, afterHoursFiles, append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI", "VTRAN", "VOUT", ".001", ".002", ".003", ".004", ".005", ".006")...)
 	swaziland = fileChecker.NewLoggingService(log.With(logger, "component", "swazilandFileChecker"), swaziland)
 	swaziland = fileChecker.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace: "api",
@@ -248,3 +248,4 @@ func (s *service) StatusResults() map[string]map[string]string {
 func (s *service) storeGlobalStateDaily() {
 	s.store.addGlobalStateDaily(s.StatusResults())
 }
+
