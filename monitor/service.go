@@ -246,6 +246,6 @@ func (s *service) StatusResults() map[string]map[string]string {
 }
 
 func (s *service) storeGlobalStateDaily() {
-	s.store.addGlobalStateDaily(s.StatusResults())
+	s.store.setGlobalStateDaily(s.StatusResults())
 }
 

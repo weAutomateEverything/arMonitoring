@@ -4,10 +4,12 @@ import (
 	"gopkg.in/mgo.v2"
 	"log"
 	"time"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type Store interface {
-	addGlobalStateDaily(globalFileStatus map[string]map[string]string) error
+	setGlobalStateDaily(globalFileStatus map[string]map[string]string) error
+	getGlobalStateDailyForThisDate(searchDate string) *globalState
 }
 
 type mongoStore struct {
@@ -15,7 +17,7 @@ type mongoStore struct {
 }
 
 type globalState struct {
-	LastUpdate       time.Time
+	Date       time.Time `bson:"_id,omitempty"`
 	GlobalFileStatus map[string]map[string]string
 }
 
@@ -23,9 +25,20 @@ func NewMongoStore(mongo *mgo.Database) Store {
 	return &mongoStore{mongo}
 }
 
-func (s mongoStore) addGlobalStateDaily(globalFileStatus map[string]map[string]string) error {
+func (s mongoStore) setGlobalStateDaily(globalFileStatus map[string]map[string]string) error {
 	log.Println("Storing daily global state")
 	c := s.mongo.C("GlobalStateDaily")
-	stateItem := globalState{LastUpdate: time.Now(), GlobalFileStatus: globalFileStatus}
+	stateItem := globalState{Date: time.Now(), GlobalFileStatus: globalFileStatus}
 	return c.Insert(stateItem)
+}
+
+func (s mongoStore) getGlobalStateDailyForThisDate(searchDate string) *globalState {
+	log.Printf("Retreiving global state for %v", searchDate)
+	c := s.mongo.C("GlobalStateDaily")
+	globalStateItem := &globalState{}
+	err := c.Find(bson.M{"Date": searchDate}).One(&globalStateItem)
+	if err != nil {
+		log.Printf("Faild to retreive Global State for %v", searchDate)
+	}
+	return globalStateItem
 }
