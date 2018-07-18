@@ -4,12 +4,11 @@ import (
 	"gopkg.in/mgo.v2"
 	"log"
 	"time"
-	"gopkg.in/mgo.v2/bson"
 )
 
 type Store interface {
 	setGlobalStateDaily(globalFileStatus map[string]map[string]string) error
-	getGlobalStateDailyForThisDate(searchDate string) *globalState
+	getGlobalStateDailyForThisDate(searchDate string) (map[string]map[string]string, error)
 }
 
 type mongoStore struct {
@@ -17,7 +16,7 @@ type mongoStore struct {
 }
 
 type globalState struct {
-	Date       time.Time `bson:"_id,omitempty"`
+	Date             string `bson:"_id,omitempty"`
 	GlobalFileStatus map[string]map[string]string
 }
 
@@ -28,17 +27,17 @@ func NewMongoStore(mongo *mgo.Database) Store {
 func (s mongoStore) setGlobalStateDaily(globalFileStatus map[string]map[string]string) error {
 	log.Println("Storing daily global state")
 	c := s.mongo.C("GlobalStateDaily")
-	stateItem := globalState{Date: time.Now(), GlobalFileStatus: globalFileStatus}
+	stateItem := globalState{Date: time.Now().Format("02012006"), GlobalFileStatus: globalFileStatus}
 	return c.Insert(stateItem)
 }
 
-func (s mongoStore) getGlobalStateDailyForThisDate(searchDate string) *globalState {
+func (s mongoStore) getGlobalStateDailyForThisDate(searchDate string) (map[string]map[string]string, error) {
 	log.Printf("Retreiving global state for %v", searchDate)
 	c := s.mongo.C("GlobalStateDaily")
-	globalStateItem := &globalState{}
-	err := c.Find(bson.M{"Date": searchDate}).One(&globalStateItem)
+	var gs globalState
+	err := c.FindId(searchDate).One(&gs)
 	if err != nil {
-		log.Printf("Faild to retreive Global State for %v", searchDate)
+		return nil, err
 	}
-	return globalStateItem
+	return gs.GlobalFileStatus, nil
 }

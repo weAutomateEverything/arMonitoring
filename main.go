@@ -10,9 +10,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/weAutomateEverything/go2hal/database"
 	"github.com/weAutomateEverything/fileMonitorService/fileChecker"
 	"github.com/weAutomateEverything/fileMonitorService/monitor"
+	"github.com/weAutomateEverything/go2hal/database"
 	"os/signal"
 	"syscall"
 )
@@ -51,6 +51,8 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.Handle("/fileStatus", monitor.MakeHandler(mon, httpLogger, nil))
+	mux.Handle("/setGlobalState", monitor.MakeHandler(mon, httpLogger, nil))
+	mux.Handle("/backdated", monitor.MakeHandler(mon, httpLogger, nil))
 
 	http.Handle("/", accessControl(mux))
 	http.Handle("/metrics", promhttp.Handler())
