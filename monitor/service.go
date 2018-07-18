@@ -1,17 +1,16 @@
 package monitor
 
 import (
-
-	"github.com/jasonlvhit/gocron"
-	"github.com/weAutomateEverything/fileMonitorService/fileChecker"
 	"github.com/go-kit/kit/log"
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
+	"github.com/jasonlvhit/gocron"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
-
+	"github.com/weAutomateEverything/fileMonitorService/fileChecker"
 )
 
 type Service interface {
 	StatusResults() map[string]map[string]string
+	getDatedGlobalStateDaily(date string) (map[string]map[string]string, error)
 	resetValues()
 	resetAfterHoursValues()
 	storeGlobalStateDaily()
@@ -28,7 +27,7 @@ func NewService(fieldKeys []string, logger log.Logger, store Store, fileStore fi
 
 	common := []string{"SE", "GL", "TXN", "DA", "MS", "EP747", "VISA_OUTGOING_MONET_TRANS_REPORT", "VISA_INCOMING_FILES_SUMMARY_REPORT", "TRANS_INPUT_LIST_", "VISA_INCOMING_MONET_TRANS_REPORT", "VISA_OUTGOING_FILES_SUMMARY_REPORT", "MC_INCOMING_MONET_TRANS_REPORT", "MC_OUTGOING_MONET_TRANS_REPORT", "RECON_REPORT", "MERCH_REJ_TRANS", "MC_OUTGOING_FILES_SUMMARY_REPORT", "MASTERCARD_ACKNOWLEDGEMENT_REPORT", "MC_INCOMING_FILES_SUMMARY_REPORT", "SPTLSB"}
 	backDatedFiles := []string{"GL", "SE", "TXN", "CGNI", "INT00001", "INT00003", "INT00007", "SR00001", "MUL00002", "MUL00004"}
-	afterHoursFiles:= []string{ ".001", ".002", ".003", ".004", ".005", ".006", "SPTLSB"}
+	afterHoursFiles := []string{".001", ".002", ".003", ".004", ".005", ".006", "SPTLSB"}
 
 	//Zimbabwe
 	zimbabwe := fileChecker.NewFileChecker(fileStore, "Zimbabwe", "/mnt/zimbabwe", backDatedFiles, afterHoursFiles, append(common, "VTRAN", "VOUT", ".001", ".002", ".003", ".004", ".005", ".006")...)
@@ -249,3 +248,6 @@ func (s *service) storeGlobalStateDaily() {
 	s.store.setGlobalStateDaily(s.StatusResults())
 }
 
+func (s *service) getDatedGlobalStateDaily(date string) (map[string]map[string]string, error) {
+	return s.store.getGlobalStateDailyForThisDate(date)
+}
