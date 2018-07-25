@@ -1,0 +1,32 @@
+{
+  "filenames": [
+    {
+      "filename" : ".001",
+      "readablename" : "TT.001"
+    },
+    {
+      "filename" : ".002",
+      "readablename" : "TT.002"
+    },
+    {
+      "filename" : ".003",
+      "readablename" : "TT.003"
+    },
+    {
+      "filename" : ".004",
+      "readablename" : "TT.004"
+    },
+    {
+      "filename" : ".005",
+      "readablename" : "TT.005"
+    },
+    {
+      "filename" : ".006",
+      "readablename" : "TT.006"
+    },
+    {
+      "filename" : "CGNI",
+      "readablename" : "National Local Switch"
+    }
+  ]
+}

@@ -11,6 +11,7 @@ import (
 	"os"
 
 	"github.com/weAutomateEverything/fileMonitorService/fileChecker"
+	"github.com/weAutomateEverything/fileMonitorService/jsonFileInteraction"
 	"github.com/weAutomateEverything/fileMonitorService/monitor"
 	"github.com/weAutomateEverything/go2hal/database"
 	"os/signal"
@@ -31,7 +32,9 @@ func main() {
 	dailyStore := monitor.NewMongoStore(db)
 	recentStore := fileChecker.NewMongoStore(db)
 
-	mon := monitor.NewService(fieldKeys, logger, dailyStore, recentStore)
+	json := jsonFileInteraction.NewJSONService()
+
+	mon := monitor.NewService(json, fieldKeys, logger, dailyStore, recentStore)
 	mon = monitor.NewLoggingService(log.With(logger, "component", "fileMonitor"), mon)
 	mon = monitor.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace: "api",
