@@ -26,12 +26,12 @@ func NewService(json jsonFileInteraction.Service, fieldKeys []string, logger log
 
 	s := &service{store: store}
 
-	common := []string{"SE", "GL", "TXN", "DA", "MS", "EP747", "VISA_OUTGOING_MONET_TRANS_REPORT", "VISA_INCOMING_FILES_SUMMARY_REPORT", "TRANS_INPUT_LIST_", "VISA_INCOMING_MONET_TRANS_REPORT", "VISA_OUTGOING_FILES_SUMMARY_REPORT", "MC_INCOMING_MONET_TRANS_REPORT", "MC_OUTGOING_MONET_TRANS_REPORT", "RECON_REPORT", "MERCH_REJ_TRANS", "MC_OUTGOING_FILES_SUMMARY_REPORT", "MASTERCARD_ACKNOWLEDGEMENT_REPORT", "MC_INCOMING_FILES_SUMMARY_REPORT", "SPTLSB"}
+	common := []string{"SE", "GL", "TXN", "DA", "MS", "EP747", "SPTLSB"}
 	backDatedFiles := []string{"GL", "SE", "TXN", "CGNI", "INT00001", "INT00003", "INT00007", "SR00001", "MUL00002", "MUL00004"}
 	afterHoursFiles := []string{".001", ".002", ".003", ".004", ".005", ".006", "SPTLSB"}
 
 	//Zimbabwe
-	zimbabwe := fileChecker.NewFileChecker(json, fileStore, "Zimbabwe", "/mnt/zimbabwe", backDatedFiles, afterHoursFiles, append(common, "VTRAN", "VOUT", ".001", ".002", ".003", ".004", ".005", ".006")...)
+	zimbabwe := fileChecker.NewFileChecker(json, fileStore, "Zimbabwe", "/mnt/zimbabwe", backDatedFiles, afterHoursFiles, append(common, "VTRAN", "VOUT", ".001", ".002", ".003", ".004", ".005", ".006","VISA_OUTGOING_MONET_TRANS_REPORT", "VISA_INCOMING_FILES_SUMMARY_REPORT", "TRANS_INPUT_LIST_", "VISA_INCOMING_MONET_TRANS_REPORT", "VISA_OUTGOING_FILES_SUMMARY_REPORT", "MC_INCOMING_MONET_TRANS_REPORT", "MC_OUTGOING_MONET_TRANS_REPORT", "RECON_REPORT", "MERCH_REJ_TRANS", "MC_OUTGOING_FILES_SUMMARY_REPORT", "MASTERCARD_ACKNOWLEDGEMENT_REPORT", "MC_INCOMING_FILES_SUMMARY_REPORT")...)
 	zimbabwe = fileChecker.NewLoggingService(log.With(logger, "component", "zimbabweFileChecker"), zimbabwe)
 	zimbabwe = fileChecker.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace: "api",
@@ -48,7 +48,7 @@ func NewService(json jsonFileInteraction.Service, fieldKeys []string, logger log
 	s.globalStatus = append(s.globalStatus, zimbabwe)
 
 	//Zambia
-	zambia := fileChecker.NewFileChecker(json, fileStore, "Zambia", "/mnt/zambiaprod", backDatedFiles, afterHoursFiles, append(common, "VTRAN", "VOUT", ".001", ".002", ".003", ".004", ".005", ".006")...)
+	zambia := fileChecker.NewFileChecker(json, fileStore, "Zambia", "/mnt/zambiaprod", backDatedFiles, afterHoursFiles, append(common, "VTRAN", "VOUT", ".001", ".002", ".003", ".004", ".005", ".006","VISA_OUTGOING_MONET_TRANS_REPORT", "VISA_INCOMING_FILES_SUMMARY_REPORT", "TRANS_INPUT_LIST_", "VISA_INCOMING_MONET_TRANS_REPORT", "VISA_OUTGOING_FILES_SUMMARY_REPORT", "MC_INCOMING_MONET_TRANS_REPORT", "MC_OUTGOING_MONET_TRANS_REPORT", "RECON_REPORT", "MERCH_REJ_TRANS", "MC_OUTGOING_FILES_SUMMARY_REPORT", "MASTERCARD_ACKNOWLEDGEMENT_REPORT", "MC_INCOMING_FILES_SUMMARY_REPORT")...)
 	zambia = fileChecker.NewLoggingService(log.With(logger, "component", "zambiaFileChecker"), zambia)
 	zambia = fileChecker.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace: "api",
@@ -65,7 +65,7 @@ func NewService(json jsonFileInteraction.Service, fieldKeys []string, logger log
 	s.globalStatus = append(s.globalStatus, zambia)
 
 	//Ghana
-	ghana := fileChecker.NewFileChecker(json, fileStore, "Ghana", "/mnt/ghana", backDatedFiles, afterHoursFiles, append(common, "MUL", "VTRAN", "VOUT", ".001", ".002", ".003", ".004", ".005", ".006")...)
+	ghana := fileChecker.NewFileChecker(json, fileStore, "Ghana", "/mnt/ghana", backDatedFiles, afterHoursFiles, append(common, "MUL", "VTRAN", "VOUT", ".001", ".002", ".003", ".004", ".005", ".006","VISA_OUTGOING_MONET_TRANS_REPORT", "VISA_INCOMING_FILES_SUMMARY_REPORT", "TRANS_INPUT_LIST_", "VISA_INCOMING_MONET_TRANS_REPORT", "VISA_OUTGOING_FILES_SUMMARY_REPORT", "MC_INCOMING_MONET_TRANS_REPORT", "MC_OUTGOING_MONET_TRANS_REPORT", "RECON_REPORT", "MERCH_REJ_TRANS", "MC_OUTGOING_FILES_SUMMARY_REPORT", "MASTERCARD_ACKNOWLEDGEMENT_REPORT", "MC_INCOMING_FILES_SUMMARY_REPORT")...)
 	ghana = fileChecker.NewLoggingService(log.With(logger, "component", "ghanaFileChecker"), ghana)
 	ghana = fileChecker.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace: "api",
@@ -99,7 +99,7 @@ func NewService(json jsonFileInteraction.Service, fieldKeys []string, logger log
 	s.globalStatus = append(s.globalStatus, ghanausd)
 
 	//Botswana
-	botswana := fileChecker.NewFileChecker(json, fileStore, "Botswana", "/mnt/botswana", backDatedFiles, afterHoursFiles, append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "VTRAN", "VOUT", ".001", ".002", ".003", ".004", ".005", ".006")...)
+	botswana := fileChecker.NewFileChecker(json, fileStore, "Botswana", "/mnt/botswana", backDatedFiles, afterHoursFiles, append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "VTRAN", "VOUT", ".001", ".002", ".003", ".004", ".005", ".006","VISA_OUTGOING_MONET_TRANS_REPORT", "VISA_INCOMING_FILES_SUMMARY_REPORT", "TRANS_INPUT_LIST_", "VISA_INCOMING_MONET_TRANS_REPORT", "VISA_OUTGOING_FILES_SUMMARY_REPORT", "MC_INCOMING_MONET_TRANS_REPORT", "MC_OUTGOING_MONET_TRANS_REPORT", "RECON_REPORT", "MERCH_REJ_TRANS", "MC_OUTGOING_FILES_SUMMARY_REPORT", "MASTERCARD_ACKNOWLEDGEMENT_REPORT", "MC_INCOMING_FILES_SUMMARY_REPORT")...)
 	botswana = fileChecker.NewLoggingService(log.With(logger, "component", "botswanaFileChecker"), botswana)
 	botswana = fileChecker.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace: "api",
@@ -116,7 +116,7 @@ func NewService(json jsonFileInteraction.Service, fieldKeys []string, logger log
 	s.globalStatus = append(s.globalStatus, botswana)
 
 	//Namibia
-	namibia := fileChecker.NewFileChecker(json, fileStore, "Namibia", "/mnt/namibia", backDatedFiles, afterHoursFiles, append(common, "MUL", "INT00001", "INT00003", "INT00007", "SR00001", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI", "VTRAN", "VOUT", ".001", ".002", ".003", ".004", ".005", ".006")...)
+	namibia := fileChecker.NewFileChecker(json, fileStore, "Namibia", "/mnt/namibia", backDatedFiles, afterHoursFiles, append(common, "MUL", "INT00001", "INT00003", "INT00007", "SR00001", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI", "VTRAN", "VOUT", ".001", ".002", ".003", ".004", ".005", ".006","VISA_OUTGOING_MONET_TRANS_REPORT", "VISA_INCOMING_FILES_SUMMARY_REPORT", "TRANS_INPUT_LIST_", "VISA_INCOMING_MONET_TRANS_REPORT", "VISA_OUTGOING_FILES_SUMMARY_REPORT", "MC_INCOMING_MONET_TRANS_REPORT", "MC_OUTGOING_MONET_TRANS_REPORT", "RECON_REPORT", "MERCH_REJ_TRANS", "MC_OUTGOING_FILES_SUMMARY_REPORT", "MASTERCARD_ACKNOWLEDGEMENT_REPORT", "MC_INCOMING_FILES_SUMMARY_REPORT")...)
 	namibia = fileChecker.NewLoggingService(log.With(logger, "component", "namibiaFileChecker"), namibia)
 	namibia = fileChecker.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace: "api",
@@ -133,7 +133,7 @@ func NewService(json jsonFileInteraction.Service, fieldKeys []string, logger log
 	s.globalStatus = append(s.globalStatus, namibia)
 
 	//Malawi
-	malawi := fileChecker.NewFileChecker(json, fileStore, "Malawi", "/mnt/malawi", backDatedFiles, afterHoursFiles, append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI", "VTRAN", "VOUT", ".001", ".002", ".003", ".004", ".005", ".006")...)
+	malawi := fileChecker.NewFileChecker(json, fileStore, "Malawi", "/mnt/malawi", backDatedFiles, afterHoursFiles, append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI", "VTRAN", "VOUT", ".001", ".002", ".003", ".004", ".005", ".006","VISA_OUTGOING_MONET_TRANS_REPORT", "VISA_INCOMING_FILES_SUMMARY_REPORT", "TRANS_INPUT_LIST_", "VISA_INCOMING_MONET_TRANS_REPORT", "VISA_OUTGOING_FILES_SUMMARY_REPORT", "MC_INCOMING_MONET_TRANS_REPORT", "MC_OUTGOING_MONET_TRANS_REPORT", "RECON_REPORT", "MERCH_REJ_TRANS", "MC_OUTGOING_FILES_SUMMARY_REPORT", "MASTERCARD_ACKNOWLEDGEMENT_REPORT", "MC_INCOMING_FILES_SUMMARY_REPORT")...)
 	malawi = fileChecker.NewLoggingService(log.With(logger, "component", "malawiFileChecker"), malawi)
 	malawi = fileChecker.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace: "api",
@@ -150,7 +150,7 @@ func NewService(json jsonFileInteraction.Service, fieldKeys []string, logger log
 	s.globalStatus = append(s.globalStatus, malawi)
 
 	//Kenya
-	kenya := fileChecker.NewFileChecker(json, fileStore, "Kenya", "/mnt/kenya", backDatedFiles, afterHoursFiles, append(common)...)
+	kenya := fileChecker.NewFileChecker(json, fileStore, "Kenya", "/mnt/kenya", backDatedFiles, afterHoursFiles, append(common,"VISA_OUTGOING_MONET_TRANS_REPORT", "VISA_INCOMING_FILES_SUMMARY_REPORT", "TRANS_INPUT_LIST_", "VISA_INCOMING_MONET_TRANS_REPORT", "VISA_OUTGOING_FILES_SUMMARY_REPORT", "MC_INCOMING_MONET_TRANS_REPORT", "MC_OUTGOING_MONET_TRANS_REPORT", "RECON_REPORT", "MERCH_REJ_TRANS", "MC_OUTGOING_FILES_SUMMARY_REPORT", "MASTERCARD_ACKNOWLEDGEMENT_REPORT", "MC_INCOMING_FILES_SUMMARY_REPORT")...)
 	kenya = fileChecker.NewLoggingService(log.With(logger, "component", "kenyaFileChecker"), kenya)
 	kenya = fileChecker.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace: "api",
@@ -167,7 +167,7 @@ func NewService(json jsonFileInteraction.Service, fieldKeys []string, logger log
 	s.globalStatus = append(s.globalStatus, kenya)
 
 	//Lesotho
-	lesotho := fileChecker.NewFileChecker(json, fileStore, "Lesotho", "/mnt/lesotho", backDatedFiles, afterHoursFiles, append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI", "VTRAN", "VOUT", ".001", ".002", ".003", ".004", ".005", ".006")...)
+	lesotho := fileChecker.NewFileChecker(json, fileStore, "Lesotho", "/mnt/lesotho", backDatedFiles, afterHoursFiles, append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI", "VTRAN", "VOUT", ".001", ".002", ".003", ".004", ".005", ".006","VISA_OUTGOING_MONET_TRANS_REPORT", "VISA_INCOMING_FILES_SUMMARY_REPORT", "TRANS_INPUT_LIST_", "VISA_INCOMING_MONET_TRANS_REPORT", "VISA_OUTGOING_FILES_SUMMARY_REPORT", "MC_INCOMING_MONET_TRANS_REPORT", "MC_OUTGOING_MONET_TRANS_REPORT", "RECON_REPORT", "MERCH_REJ_TRANS", "MC_OUTGOING_FILES_SUMMARY_REPORT", "MASTERCARD_ACKNOWLEDGEMENT_REPORT", "MC_INCOMING_FILES_SUMMARY_REPORT")...)
 	lesotho = fileChecker.NewLoggingService(log.With(logger, "component", "lesothoFileChecker"), lesotho)
 	lesotho = fileChecker.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace: "api",
@@ -184,7 +184,7 @@ func NewService(json jsonFileInteraction.Service, fieldKeys []string, logger log
 	s.globalStatus = append(s.globalStatus, lesotho)
 
 	//Swaziland
-	swaziland := fileChecker.NewFileChecker(json, fileStore, "Swaziland", "/mnt/swaziland", backDatedFiles, afterHoursFiles, append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI", "VTRAN", "VOUT", ".001", ".002", ".003", ".004", ".005", ".006")...)
+	swaziland := fileChecker.NewFileChecker(json, fileStore, "Swaziland", "/mnt/swaziland", backDatedFiles, afterHoursFiles, append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI", "VTRAN", "VOUT", ".001", ".002", ".003", ".004", ".005", ".006","VISA_OUTGOING_MONET_TRANS_REPORT", "VISA_INCOMING_FILES_SUMMARY_REPORT", "TRANS_INPUT_LIST_", "VISA_INCOMING_MONET_TRANS_REPORT", "VISA_OUTGOING_FILES_SUMMARY_REPORT", "MC_INCOMING_MONET_TRANS_REPORT", "MC_OUTGOING_MONET_TRANS_REPORT", "RECON_REPORT", "MERCH_REJ_TRANS", "MC_OUTGOING_FILES_SUMMARY_REPORT", "MASTERCARD_ACKNOWLEDGEMENT_REPORT", "MC_INCOMING_FILES_SUMMARY_REPORT")...)
 	swaziland = fileChecker.NewLoggingService(log.With(logger, "component", "swazilandFileChecker"), swaziland)
 	swaziland = fileChecker.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace: "api",
