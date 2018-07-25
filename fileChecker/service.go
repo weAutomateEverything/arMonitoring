@@ -3,6 +3,7 @@ package fileChecker
 import (
 	"fmt"
 	"github.com/matryer/try"
+	"github.com/weAutomateEverything/fileMonitorService/jsonFileInteraction"
 	"io"
 	"log"
 	"os"
@@ -19,6 +20,7 @@ type Service interface {
 	storeLocationStateRecent(name string, fileStatus map[string]string)
 	setFileStatus(name, dirPath, fileContains string, bdFiles []string, store Store) (string, error)
 	getListOfFilesInPath(path string) ([]string, error)
+	convertFileNamesToHumanReadableNames()
 }
 
 type service struct {
@@ -29,9 +31,10 @@ type service struct {
 	afterHoursFiles []string
 	fileStatus      map[string]string
 	store           Store
+	json            jsonFileInteraction.Service
 }
 
-func NewFileChecker(store Store, name, mountpath string, bdFiles []string, aHFiles []string, files ...string) Service {
+func NewFileChecker(json jsonFileInteraction.Service, store Store, name, mountpath string, bdFiles []string, aHFiles []string, files ...string) Service {
 
 	s := &service{
 		locationName:    name,
@@ -41,6 +44,7 @@ func NewFileChecker(store Store, name, mountpath string, bdFiles []string, aHFil
 		afterHoursFiles: aHFiles,
 		fileStatus:      make(map[string]string),
 		store:           store,
+		json:            json,
 	}
 
 	storeContents, err := store.getLocationStateRecent(name)
@@ -115,6 +119,10 @@ func (s *service) setValues(name, mountpath string, bdFiles []string, files []st
 		}
 
 		s.storeLocationStateRecent(s.locationName, s.fileStatus)
+
+		//Convert names to human readable
+		s.convertFileNamesToHumanReadableNames()
+
 		log.Println(fmt.Sprintf("Completed file confirmation process on %s share", name))
 		time.Sleep(4 * time.Minute)
 	}
@@ -175,6 +183,18 @@ func (s *service) setFileStatus(name, dirPath, fileContains string, bdFiles []st
 		}
 	}
 	return "notreceived", nil
+}
+
+func (s *service) convertFileNamesToHumanReadableNames() {
+
+	humanReadableFileNameList := s.json.ReturnFileNamesArray()
+
+	for _, fileName := range humanReadableFileNameList {
+		if _, ok := s.fileStatus[fileName.Name]; ok {
+			s.fileStatus[fileName.ReadableName] = s.fileStatus[fileName.Name]
+			delete(s.fileStatus, fileName.Name)
+		}
+	}
 }
 
 func isShareFolderEmpty(path string) bool {
