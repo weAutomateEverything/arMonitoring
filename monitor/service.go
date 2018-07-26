@@ -82,7 +82,7 @@ func NewService(json jsonFileInteraction.Service, fieldKeys []string, logger log
 	s.globalStatus = append(s.globalStatus, ghana)
 
 	//GhanaUSD
-	ghanausd := fileChecker.NewFileChecker(json, fileStore, "GhanaUSD", "/mnt/ghanausd", backDatedFiles, afterHoursFiles, append(common, "VTRAN", "VOUT")...)
+	ghanausd := fileChecker.NewFileChecker(json, fileStore, "GhanaUSD", "/mnt/ghanausd", backDatedFiles, afterHoursFiles, append(common)...)
 	ghanausd = fileChecker.NewLoggingService(log.With(logger, "component", "ghanausdFileChecker"), ghanausd)
 	ghanausd = fileChecker.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace: "api",
