@@ -19,12 +19,13 @@ func NewInstrumentService(counter metrics.Counter, latency metrics.Histogram, s 
 	}
 }
 
-func (s *instrumentingService) ReturnFileNamesArray() {
+func (s *instrumentingService) ReturnFileNamesArray() []FileName {
 	defer func(begin time.Time) {
 		s.requestCount.With("method", "ReturnFileNamesArray").Add(1)
 		s.requestLatency.With("method", "ReturnFileNamesArray").Observe(time.Since(begin).Seconds())
 	}(time.Now())
-	s.Service.ReturnFileNamesArray()
+	array := s.Service.ReturnFileNamesArray()
+	return array
 }
 
 func (s *instrumentingService) UnmarshalJSONFile(file string) error {
