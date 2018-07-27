@@ -64,6 +64,10 @@ func NewFileChecker(json jsonFileInteraction.Service, store Store, name, mountpa
 }
 
 func (s *service) GetValues() map[string]string {
+
+	//Convert names to human readable
+	s.convertFileNamesToHumanReadableNames()
+
 	return s.fileStatus
 }
 
@@ -119,9 +123,6 @@ func (s *service) setValues(name, mountpath string, bdFiles []string, files []st
 		}
 
 		s.storeLocationStateRecent(s.locationName, s.fileStatus)
-
-		//Convert names to human readable
-		s.convertFileNamesToHumanReadableNames()
 
 		log.Println(fmt.Sprintf("Completed file confirmation process on %s share", name))
 		time.Sleep(4 * time.Minute)
