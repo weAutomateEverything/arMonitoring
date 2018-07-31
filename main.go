@@ -33,6 +33,19 @@ func main() {
 	recentStore := fileChecker.NewMongoStore(db)
 
 	json := jsonFileInteraction.NewJSONService()
+	json = jsonFileInteraction.NewLoggingService(log.With(logger, "component", "jsonFileInteraction"), json)
+	json = jsonFileInteraction.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
+		Namespace: "api",
+		Subsystem: "jsonFileInteraction",
+		Name:      "request_count",
+		Help:      "Number of requests received.",
+	}, fieldKeys),
+		kitprometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
+			Namespace: "api",
+			Subsystem: "jsonFileInteraction",
+			Name:      "request_latency_microseconds",
+			Help:      "Total duration of requests in microseconds.",
+		}, fieldKeys), json)
 
 	mon := monitor.NewService(json, fieldKeys, logger, dailyStore, recentStore)
 	mon = monitor.NewLoggingService(log.With(logger, "component", "fileMonitor"), mon)
