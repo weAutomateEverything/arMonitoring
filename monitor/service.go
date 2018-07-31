@@ -200,6 +200,23 @@ func NewService(json jsonFileInteraction.Service, fieldKeys []string, logger log
 		}, fieldKeys), swaziland)
 	s.globalStatus = append(s.globalStatus, swaziland)
 
+	//Tanzania
+	tanzania := fileChecker.NewFileChecker(json, fileStore, "Tanzania", "/mnt/tanzania", backDatedFiles, afterHoursFiles, append(common, "MUL", "DCI_OUTGOING_MONET_TRANS_REPORT", "DCI_TRANS_INPUT_LIST_", "CGNI", "VTRAN", "VOUT", ".001", ".002", ".003", ".004", ".005", ".006","VISA_OUTGOING_MONET_TRANS_REPORT", "VISA_INCOMING_FILES_SUMMARY_REPORT", "TRANS_INPUT_LIST_", "VISA_INCOMING_MONET_TRANS_REPORT", "VISA_OUTGOING_FILES_SUMMARY_REPORT", "MC_INCOMING_MONET_TRANS_REPORT", "MC_OUTGOING_MONET_TRANS_REPORT", "RECON_REPORT", "MERCH_REJ_TRANS", "MC_OUTGOING_FILES_SUMMARY_REPORT", "MASTERCARD_ACKNOWLEDGEMENT_REPORT", "MC_INCOMING_FILES_SUMMARY_REPORT")...)
+	tanzania = fileChecker.NewLoggingService(log.With(logger, "component", "tanzaniaFileChecker"), tanzania)
+	tanzania = fileChecker.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
+		Namespace: "api",
+		Subsystem: "tanzaniaFileChecker",
+		Name:      "request_count",
+		Help:      "Number of requests received.",
+	}, fieldKeys),
+		kitprometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
+			Namespace: "api",
+			Subsystem: "tanzaniaFileChecker",
+			Name:      "request_latency_microseconds",
+			Help:      "Total duration of requests in microseconds.",
+		}, fieldKeys), tanzania)
+	s.globalStatus = append(s.globalStatus, tanzania)
+
 	resetsched := gocron.NewScheduler()
 	afterHoursResetsched := gocron.NewScheduler()
 	globalStateDailySched := gocron.NewScheduler()
