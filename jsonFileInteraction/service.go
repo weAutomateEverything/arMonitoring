@@ -37,8 +37,8 @@ type Location struct {
 
 func NewJSONService() Service {
 	json := &service{}
-	json.UnmarshalJSONFile("./fileNames.json")
-	json.UnmarshalJSONFile("./locations.json")
+	json.UnmarshalJSONFile("/opt/app/fileNames.json")
+	json.UnmarshalJSONFile("/opt/app/locations.json")
 	return json
 }
 
