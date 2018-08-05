@@ -20,7 +20,7 @@ type Service interface {
 	storeLocationStateRecent(name string, fileStatus map[string]string)
 	setFileStatus(name, dirPath, fileContains string, bdFiles []string, store Store) (string, error)
 	getListOfFilesInPath(path string) ([]string, error)
-	convertFileNamesToHumanReadableNames()
+	convertFileNamesToHumanReadableNames() map[string]string
 }
 
 type service struct {
@@ -34,6 +34,7 @@ type service struct {
 	json            jsonFileInteraction.Service
 }
 
+//Create New FileChecker instance
 func NewFileChecker(json jsonFileInteraction.Service, store Store, name, mountpath string, bdFiles []string, aHFiles []string, files ...string) Service {
 
 	s := &service{
@@ -65,10 +66,9 @@ func NewFileChecker(json jsonFileInteraction.Service, store Store, name, mountpa
 
 func (s *service) GetValues() map[string]string {
 
-	//Convert names to human readable
-	s.convertFileNamesToHumanReadableNames()
+	humanReadableFileStatusResponse := s.convertFileNamesToHumanReadableNames()
 
-	return s.fileStatus
+	return humanReadableFileStatusResponse
 }
 
 func (s *service) GetLocationName() string {
@@ -78,7 +78,7 @@ func (s *service) GetLocationName() string {
 func (s *service) Reset() {
 	log.Printf("Resetting %s", s.locationName)
 	for k := range s.fileStatus {
-		if !checkIfFileIsAfterHours(k, s.afterHoursFiles) {
+		if !isFileIsAfterHours(k, s.afterHoursFiles) {
 			s.fileStatus[k] = "notreceived"
 		}
 	}
@@ -86,7 +86,7 @@ func (s *service) Reset() {
 func (s *service) ResetAfterHours() {
 	log.Printf("Resetting %s", s.locationName)
 	for k := range s.fileStatus {
-		if checkIfFileIsAfterHours(k, s.afterHoursFiles) {
+		if isFileIsAfterHours(k, s.afterHoursFiles) {
 			s.fileStatus[k] = "notreceived"
 		}
 	}
@@ -110,7 +110,7 @@ func (s *service) setValues(name, mountpath string, bdFiles []string, files []st
 			if err != nil {
 				log.Println(err)
 			}
-			// Test for existance of key in map
+			//Test for existence of key in map
 			if _, ok := s.fileStatus[x]; ok {
 				if s.fileStatus[x] == "unaccessable" {
 					s.fileStatus[x] = "notreceived"
@@ -160,7 +160,7 @@ func (s *service) setFileStatus(name, dirPath, fileContains string, bdFiles []st
 
 	for _, file := range fileList {
 
-		backdated := checkIfFileIsBackDated(file, bdFiles)
+		backdated := isFileIsBackDated(file, bdFiles)
 
 		expectedTime := expectedFileArivalTime(fileContains)
 		contains := strings.Contains(file, fileContains)
@@ -186,16 +186,30 @@ func (s *service) setFileStatus(name, dirPath, fileContains string, bdFiles []st
 	return "notreceived", nil
 }
 
-func (s *service) convertFileNamesToHumanReadableNames() {
+func createHumanReadableResponseMap(notifications map[string]string) map[string]string {
+
+	humanReadableFileStatusResponse := make(map[string]string)
+
+	for k, v := range notifications {
+		humanReadableFileStatusResponse[k] = v
+	}
+
+	return humanReadableFileStatusResponse
+}
+
+func (s *service) convertFileNamesToHumanReadableNames() map[string]string {
 
 	humanReadableFileNameList := s.json.ReturnFileNamesArray()
 
+	humanReadableFileStatusResponse := createHumanReadableResponseMap(s.fileStatus)
+
 	for _, fileName := range humanReadableFileNameList {
 		if _, ok := s.fileStatus[fileName.Name]; ok {
-			s.fileStatus[fileName.ReadableName] = s.fileStatus[fileName.Name]
-			delete(s.fileStatus, fileName.Name)
+			humanReadableFileStatusResponse[fileName.ReadableName] = humanReadableFileStatusResponse[fileName.Name]
+			delete(humanReadableFileStatusResponse, fileName.Name)
 		}
 	}
+	return humanReadableFileStatusResponse
 }
 
 func isShareFolderEmpty(path string) bool {
@@ -212,7 +226,7 @@ func isShareFolderEmpty(path string) bool {
 	return false
 }
 
-func checkIfFileIsBackDated(file string, bdFiles []string) bool {
+func isFileIsBackDated(file string, bdFiles []string) bool {
 
 	var fileIsBackdated bool
 
@@ -225,7 +239,7 @@ func checkIfFileIsBackDated(file string, bdFiles []string) bool {
 	return fileIsBackdated
 }
 
-func checkIfFileIsAfterHours(file string, aHFiles []string) bool {
+func isFileIsAfterHours(file string, aHFiles []string) bool {
 
 	var fileIsAfterHours bool
 
