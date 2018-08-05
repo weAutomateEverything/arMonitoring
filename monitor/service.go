@@ -24,6 +24,7 @@ type service struct {
 	store        Store
 }
 
+//Create New monitor instance
 func NewService(json jsonFileInteraction.Service, fieldKeys []string, logger log.Logger, store Store, fileStore fileChecker.Store) Service {
 
 	s := &service{store: store}

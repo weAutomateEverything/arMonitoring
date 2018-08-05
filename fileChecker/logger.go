@@ -94,12 +94,12 @@ func (s *loggingService) getListOfFilesInPath(path string) ([]string, error) {
 	return s.Service.getListOfFilesInPath(path)
 }
 
-func (s *loggingService) convertFileNamesToHumanReadableNames() {
+func (s *loggingService) convertFileNamesToHumanReadableNames() map[string]string {
 	defer func(begin time.Time) {
 		s.logger.Log(
 			"method", "convertFileNamesToHumanReadableNames",
 			"took", time.Since(begin),
 		)
 	}(time.Now())
-	s.Service.convertFileNamesToHumanReadableNames()
+	return s.Service.convertFileNamesToHumanReadableNames()
 }
