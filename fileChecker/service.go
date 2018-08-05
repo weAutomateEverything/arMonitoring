@@ -78,7 +78,7 @@ func (s *service) GetLocationName() string {
 func (s *service) Reset() {
 	log.Printf("Resetting %s", s.locationName)
 	for k := range s.fileStatus {
-		if !isFileIsAfterHours(k, s.afterHoursFiles) {
+		if !isFileAfterHours(k, s.afterHoursFiles) {
 			s.fileStatus[k] = "notreceived"
 		}
 	}
@@ -86,7 +86,7 @@ func (s *service) Reset() {
 func (s *service) ResetAfterHours() {
 	log.Printf("Resetting %s", s.locationName)
 	for k := range s.fileStatus {
-		if isFileIsAfterHours(k, s.afterHoursFiles) {
+		if isFileAfterHours(k, s.afterHoursFiles) {
 			s.fileStatus[k] = "notreceived"
 		}
 	}
@@ -226,7 +226,7 @@ func isShareFolderEmpty(path string) bool {
 	return false
 }
 
-func isFileIsBackDated(file string, bdFiles []string) bool {
+func isFileBackDated(file string, bdFiles []string) bool {
 
 	var fileIsBackdated bool
 
@@ -239,7 +239,7 @@ func isFileIsBackDated(file string, bdFiles []string) bool {
 	return fileIsBackdated
 }
 
-func isFileIsAfterHours(file string, aHFiles []string) bool {
+func isFileAfterHours(file string, aHFiles []string) bool {
 
 	var fileIsAfterHours bool
 
