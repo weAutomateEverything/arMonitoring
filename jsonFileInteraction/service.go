@@ -11,7 +11,6 @@ type Service interface {
 	UnmarshalJSONFile(file string) error
 	ReturnFileNamesArray() []FileName
 	ReturnLocationsArray() []Location
-	ReturnCommonFilesArray() []string
 	ReturnBackdatedFilesArray() []string
 	ReturnAfterHoursFilesArray() []string
 }
@@ -19,7 +18,6 @@ type Service interface {
 type service struct {
 	FileNames       []FileName `json:"filenames"`
 	Locations       []Location `json:"locations"`
-	CommonFiles     []string   `json:"commonfiles"`
 	BackdatedFiles  []string   `json:"backdatedfiles"`
 	AfterHoursFiles []string   `json:"afterhoursfiles"`
 }
@@ -49,9 +47,6 @@ func (s *service) ReturnFileNamesArray() []FileName {
 func (s *service) ReturnLocationsArray() []Location {
 	return s.Locations
 }
-func (s *service) ReturnCommonFilesArray() []string {
-	return s.CommonFiles
-}
 
 func (s *service) ReturnBackdatedFilesArray() []string {
 	return s.BackdatedFiles
@@ -69,7 +64,7 @@ func (s *service) UnmarshalJSONFile(file string) error {
 		return err
 	}
 
-	fmt.Println("Successfully Opened json file")
+	fmt.Printf("Successfully Opened %v\n", file)
 	defer jsonFile.Close()
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)
