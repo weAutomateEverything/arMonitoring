@@ -33,7 +33,7 @@ func NewService(json jsonFileInteraction.Service, fieldKeys []string, logger log
 
 	for index := range locations {
 
-		location := fileChecker.NewFileChecker(json, fileStore, strings.Title(locations[index].Name), locations[index].MountPath, json.ReturnBackdatedFilesArray(), json.ReturnAfterHoursFilesArray(), append(json.ReturnCommonFilesArray(), locations[index].Files...)...)
+		location := fileChecker.NewFileChecker(json, fileStore, strings.Title(locations[index].Name), locations[index].MountPath, json.ReturnBackdatedFilesArray(), json.ReturnAfterHoursFilesArray(), locations[index].Files...)
 		location = fileChecker.NewLoggingService(log.With(logger, "component", locations[index].Name+"FileChecker"), location)
 		location = fileChecker.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 			Namespace: "api",
