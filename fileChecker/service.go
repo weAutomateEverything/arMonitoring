@@ -125,7 +125,7 @@ func (s *service) setValues(name, mountpath string, bdFiles []string, files []st
 		s.storeLocationStateRecent(s.locationName, s.fileStatus)
 
 		log.Println(fmt.Sprintf("Completed file confirmation process on %s share", name))
-		time.Sleep(4 * time.Minute)
+		time.Sleep(10 * time.Minute)
 	}
 }
 
