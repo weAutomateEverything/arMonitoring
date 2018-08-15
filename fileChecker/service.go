@@ -92,7 +92,7 @@ func (s *service) ResetAfterHours() {
 	}
 }
 
-func (s *service) setValues(name, mountpath string, bdFiles []string, files []string, store Store) {
+func (s *service) setValues(name, mountpath string, bdFiles, files []string, store Store) {
 
 	for true {
 		log.Println(fmt.Sprintf("Now accessing %s share", name))
@@ -175,6 +175,11 @@ func (s *service) setFileStatus(name, dirPath, fileContains string, bdFiles []st
 			}
 		} else if contains {
 			recent := strings.Contains(file, currentDate)
+			receivedYesterday := strings.Contains(file, yesterdayDate)
+
+			if s.isAfterHoursFileReceivedNextDay(file) && isFileAfterHours(file, s.afterHoursFiles) && receivedYesterday {
+				return "late", nil
+			}
 			if recent && convertedTime.After(expectedTime) {
 				return "late", nil
 			}
@@ -259,6 +264,14 @@ func convertTime(unconvertedTime string) time.Time {
 		log.Printf("Failed to convert time with the following error: %v", err)
 	}
 	return t
+}
+
+func (s *service) isAfterHoursFileReceivedNextDay(file string) bool {
+	currentTime := time.Now()
+	if currentTime.Before(time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), 17, 0, 0, 0, currentTime.Location())) && currentTime.After(time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), 24, 2, 0, 0, currentTime.Location())) && s.fileStatus[file] == "notreceived" {
+		return true
+	}
+	return false
 }
 
 func (s *service) getListOfFilesInPath(path string) ([]string, error) {
