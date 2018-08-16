@@ -125,7 +125,7 @@ func (s *service) setValues(name, mountpath string, bdFiles, files []string, sto
 		s.storeLocationStateRecent(s.locationName, s.fileStatus)
 
 		log.Println(fmt.Sprintf("Completed file confirmation process on %s share", name))
-		time.Sleep(10 * time.Minute)
+		time.Sleep(1 * time.Minute)
 	}
 }
 
@@ -177,7 +177,7 @@ func (s *service) setFileStatus(name, dirPath, fileContains string, bdFiles []st
 			recent := strings.Contains(file, currentDate)
 			receivedYesterday := strings.Contains(file, yesterdayDate)
 
-			if s.isAfterHoursFileReceivedNextDay(file) && isFileAfterHours(file, s.afterHoursFiles) && receivedYesterday {
+			if isFileAfterHours(file, s.afterHoursFiles) && receivedYesterday && s.isAfterHoursFileReceivedNextDay(fileContains) {
 				return "late", nil
 			}
 			if recent && convertedTime.After(expectedTime) {
@@ -268,7 +268,7 @@ func convertTime(unconvertedTime string) time.Time {
 
 func (s *service) isAfterHoursFileReceivedNextDay(file string) bool {
 	currentTime := time.Now()
-	if currentTime.Before(time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), 17, 0, 0, 0, currentTime.Location())) && currentTime.After(time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), 24, 2, 0, 0, currentTime.Location())) && s.fileStatus[file] == "notreceived" {
+	if currentTime.Before(time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), 17, 0, 0, 0, currentTime.Location())) && currentTime.After(time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), 0, 5, 0, 0, currentTime.Location())) && s.fileStatus[file] == "notreceived" {
 		return true
 	}
 	return false
