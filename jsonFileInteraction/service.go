@@ -2,9 +2,9 @@ package jsonFileInteraction
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
+	"log"
 )
 
 type Service interface {
@@ -64,7 +64,7 @@ func (s *service) UnmarshalJSONFile(file string) error {
 		return err
 	}
 
-	fmt.Printf("Successfully Opened %v\n", file)
+	log.Printf("Successfully Opened %v\n", file)
 	defer jsonFile.Close()
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)

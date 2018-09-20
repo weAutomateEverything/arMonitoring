@@ -12,6 +12,7 @@ import (
 
 	"github.com/weAutomateEverything/fileMonitorService/fileChecker"
 	"github.com/weAutomateEverything/fileMonitorService/jsonFileInteraction"
+	"github.com/weAutomateEverything/fileMonitorService/snmp"
 	"github.com/weAutomateEverything/fileMonitorService/monitor"
 	"github.com/weAutomateEverything/go2hal/database"
 	"os/signal"
@@ -61,6 +62,9 @@ func main() {
 			Name:      "request_latency_microseconds",
 			Help:      "Total duration of requests in microseconds.",
 		}, fieldKeys), mon)
+
+	sn := snmp.NewService()
+	sn = snmp.NewLoggingService(log.With(logger, "component", "snmp"), sn)
 
 	httpLogger := log.With(logger, "component", "http")
 
