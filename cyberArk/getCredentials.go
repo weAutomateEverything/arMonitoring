@@ -25,7 +25,7 @@ func (s *service) GetCyberarkPassword() {
 		cyberark.SetHost("https://epvs.za.sbicdirectory.com"),
 	)
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Println(err.Error())
 	}
 
 	ret, err := client.GetPassword().
