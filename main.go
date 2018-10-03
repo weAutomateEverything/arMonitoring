@@ -30,6 +30,8 @@ func main() {
 
 	db := database.NewConnection()
 
+	//cark := cyberArk.NewCyberarkRetreivalService()
+
 	dailyStore := monitor.NewMongoStore(db)
 	recentStore := fileChecker.NewMongoStore(db)
 
