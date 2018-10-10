@@ -3,8 +3,8 @@ package jsonFileInteraction
 import (
 	"encoding/json"
 	"io/ioutil"
-	"os"
 	"log"
+	"os"
 )
 
 type Service interface {
@@ -13,13 +13,15 @@ type Service interface {
 	ReturnLocationsArray() []Location
 	ReturnBackdatedFilesArray() []string
 	ReturnAfterHoursFilesArray() []string
+	ReturnFileExpectedArrivalTimesMap() []ExpectedArrivalTimes
 }
 
 type service struct {
-	FileNames       []FileName `json:"filenames"`
-	Locations       []Location `json:"locations"`
-	BackdatedFiles  []string   `json:"backdatedfiles"`
-	AfterHoursFiles []string   `json:"afterhoursfiles"`
+	FileNames                []FileName             `json:"filenames"`
+	Locations                []Location             `json:"locations"`
+	BackdatedFiles           []string               `json:"backdatedfiles"`
+	AfterHoursFiles          []string               `json:"afterhoursfiles"`
+	FileExpectedArrivalTimes []ExpectedArrivalTimes `json:"expectedarrivaltimes"`
 }
 
 type FileName struct {
@@ -33,10 +35,16 @@ type Location struct {
 	Files     []string `json:"files"`
 }
 
+type ExpectedArrivalTimes struct {
+	Name string `json:"name"`
+	Time string `json:"time"`
+}
+
 func NewJSONService() Service {
 	json := &service{}
 	json.UnmarshalJSONFile("/opt/app/fileNames.json")
 	json.UnmarshalJSONFile("/opt/app/locations.json")
+	json.UnmarshalJSONFile("/opt/app/fileExpectedArrivalTime.json")
 	return json
 }
 
@@ -54,6 +62,10 @@ func (s *service) ReturnBackdatedFilesArray() []string {
 
 func (s *service) ReturnAfterHoursFilesArray() []string {
 	return s.AfterHoursFiles
+}
+
+func (s *service) ReturnFileExpectedArrivalTimesMap() []ExpectedArrivalTimes {
+	return s.FileExpectedArrivalTimes
 }
 
 func (s *service) UnmarshalJSONFile(file string) error {

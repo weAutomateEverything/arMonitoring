@@ -162,7 +162,7 @@ func (s *service) setFileStatus(name, dirPath, fileContains string, bdFiles []st
 
 		backdated := isFileBackDated(file, bdFiles)
 
-		expectedTime := expectedFileArivalTime(fileContains)
+		expectedTime := s.expectedFileArivalTime(fileContains)
 		contains := strings.Contains(file, fileContains)
 
 		if backdated && contains {
@@ -288,59 +288,17 @@ func (s *service) getListOfFilesInPath(path string) ([]string, error) {
 	return list, nil
 }
 
-func expectedFileArivalTime(file string) time.Time {
+func (s *service) expectedFileArivalTime(file string) time.Time {
 
-	expectedTimes := map[string]string{
+	var expectedTime string
 
-		".001": "18:00:00",
-		".002": "18:00:00",
-		".003": "18:00:00",
-		".004": "18:00:00",
-		".005": "18:00:00",
-		".006": "18:00:00",
-		"DA":   "05:30:00",
-		"DCI_OUTGOING_MONET_TRANS_REPORT": "05:30:00",
-		"DCI_TRANS_INPUT_LIST_":           "05:30:00",
-		"EP":                                "07:30:00",
-		"GL":                                "01:30:00",
-		"INT00001":                          "01:30:00",
-		"INT00003":                          "01:30:00",
-		"INT00007":                          "01:30:00",
-		"MASTERCARD_ACKNOWLEDGEMENT_REPORT": "05:30:00",
-		"MC_INCOMING_FILES_SUMMARY_REPORT":  "05:30:00",
-		"MC_INCOMING_MONET_TRANS_REPORT":    "05:30:00",
-		"MC_OUTGOING_FILES_SUMMARY_REPORT":  "05:30:00",
-		"MC_OUTGOING_MONET_TRANS_REPORT":    "05:30:00",
-		"MERCH_REJ_TRANS":                   "05:30:00",
-		"MS":                                "05:30:00",
-		"MUL":                               "01:30:00",
-		"RECON_REPORT":                      "05:30:00",
-		"SE":                                "01:30:00",
-		"SPTLSB":                            "21:00:00",
-		"SR00001":                           "01:30:00",
-		"TRANS_INPUT_LIST_":                 "05:30:00",
-		"TXN":                               "01:30:00",
-		"VISA_INCOMING_FILES_SUMMARY_REPORT": "05:30:00",
-		"VISA_INCOMING_MONET_TRANS_REPORT":   "05:30:00",
-		"VISA_OUTGOING_FILES_SUMMARY_REPORT": "05:30:00",
-		"VISA_OUTGOING_MONET_TRANS_REPORT":   "05:30:00",
-		"VOUT":    "07:30:00",
-		"VTRAN":   "07:30:00",
-		"EP747":   "07:30:00",
-		"CGNI":    "07:30:00",
-		"GL149":   "01:30:00",
-		"GL150":   "01:30:00",
-		"DA149":   "01:30:00",
-		"DA150":   "01:30:00",
-		"SE149":   "01:30:00",
-		"SE150":   "01:30:00",
-		"MS149":   "01:30:00",
-		"MS150":   "01:30:00",
-		"149_TXN": "01:30:00",
-		"150_TXN": "01:30:00",
+	expectedTimes := s.json.ReturnFileExpectedArrivalTimesMap()
+
+	for _, f := range expectedTimes {
+		if f.Name == file {
+			expectedTime = f.Time
+		}
 	}
-
-	expectedTime := expectedTimes[file]
 
 	t := convertTime(expectedTime)
 
