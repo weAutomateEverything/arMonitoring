@@ -2,11 +2,13 @@ package cyberArk
 
 import (
 	"github.com/hoop33/go-cyberark"
+	"io/ioutil"
 	"log"
 	"os"
 )
 
 type Service interface {
+	GetCyberarkPassword() error
 }
 
 type service struct {
@@ -15,12 +17,14 @@ type service struct {
 }
 
 func NewCyberarkRetreivalService() Service {
-	s := service{}
-	s.GetCyberarkPassword()
+	s := &service{}
+	if err := s.GetCyberarkPassword(); err != nil {
+		log.Println("Failed to access Cyberark vault")
+	}
 	return s
 }
 
-func (s *service) GetCyberarkPassword() {
+func (s *service) GetCyberarkPassword() error {
 	client, err := cyberark.NewClient(
 		cyberark.SetHost("https://epvs.za.sbicdirectory.com"),
 	)
@@ -35,14 +39,30 @@ func (s *service) GetCyberarkPassword() {
 		UserName(getCyberarkUsername()).
 		Do()
 	if err != nil {
-		log.Println(err.Error())
+		return err
 	}
 
 	if ret.ErrorCode != "" {
 		log.Println(ret.ErrorCode)
 	}
 
-	s.Username = ret.Content
+	s.Username = ret.UserName
+	s.Password = ret.Content
+
+	log.Println("Successfully retreived credentials from Cyberark vault")
+
+	s.updateCedentialsFile()
+
+	return nil
+}
+
+func (s *service) updateCedentialsFile() {
+
+	err := ioutil.WriteFile("/opt/app/creds", []byte("bolloks"), 0755)
+	if err != nil {
+		log.Printf("Failed writing to credentials file with the following error: %v", err)
+	}
+
 }
 
 func getCyberarkAppID() string {

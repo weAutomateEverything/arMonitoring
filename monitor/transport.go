@@ -16,12 +16,14 @@ func MakeHandler(service Service, logger kitlog.Logger, ml machineLearning.Servi
 
 	fileStatusEndpoint := kithttp.NewServer(makeStatusRequestEndpoint(service), gokit.DecodeString, gokit.EncodeResponse, opts...)
 	setDatedGlobalState := kithttp.NewServer(makeSetGlobalStatusRequestEndpoint(service), gokit.DecodeString, gokit.EncodeResponse, opts...)
+	updateCredentials := kithttp.NewServer(makeUpdateCredentialsEndpoint(service), gokit.DecodeString, gokit.EncodeResponse, opts...)
 	getDatedGlobalState := kithttp.NewServer(makeGetDatedGlobalStateRequestEndpoint(service), handleGetDatedGlobalStateRequest, gokit.EncodeResponse, opts...)
 
 	r := mux.NewRouter()
 
 	r.Handle("/fileStatus", fileStatusEndpoint).Methods("GET")
 	r.Handle("/setGlobalState", setDatedGlobalState).Methods("GET")
+	r.Handle("/updateCredentials", updateCredentials).Methods("GET")
 	r.Handle("/backdated", getDatedGlobalState).Queries("date", "{date}").Methods("GET")
 
 	return r

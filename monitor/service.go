@@ -9,6 +9,7 @@ import (
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"strings"
+	"github.com/weAutomateEverything/fileMonitorService/cyberArk"
 )
 
 type Service interface {
@@ -17,17 +18,19 @@ type Service interface {
 	resetValues()
 	resetAfterHoursValues()
 	storeGlobalStateDaily()
+	updateCyberarkCredentials()
 }
 
 type service struct {
 	globalStatus []fileChecker.Service
 	store        Store
+	cark 		 cyberArk.Service
 }
 
 //Create New monitor instance
-func NewService(json jsonFileInteraction.Service, fieldKeys []string, logger log.Logger, store Store, fileStore fileChecker.Store) Service {
+func NewService(cark cyberArk.Service,json jsonFileInteraction.Service, fieldKeys []string, logger log.Logger, store Store, fileStore fileChecker.Store) Service {
 
-	s := &service{store: store}
+	s := &service{store: store, cark: cark}
 
 	locations := json.ReturnLocationsArray()
 
@@ -101,4 +104,8 @@ func (s *service) storeGlobalStateDaily() {
 
 func (s *service) getDatedGlobalStateDaily(date string) (map[string]map[string]string, error) {
 	return s.store.getGlobalStateDailyForThisDate(date)
+}
+
+func (s *service) updateCyberarkCredentials() {
+	s.cark.GetCyberarkPassword()
 }

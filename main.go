@@ -10,10 +10,11 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/weAutomateEverything/fileMonitorService/cyberArk"
 	"github.com/weAutomateEverything/fileMonitorService/fileChecker"
 	"github.com/weAutomateEverything/fileMonitorService/jsonFileInteraction"
-	"github.com/weAutomateEverything/fileMonitorService/snmp"
 	"github.com/weAutomateEverything/fileMonitorService/monitor"
+	"github.com/weAutomateEverything/fileMonitorService/snmp"
 	"github.com/weAutomateEverything/go2hal/database"
 	"os/signal"
 	"syscall"
@@ -30,7 +31,7 @@ func main() {
 
 	db := database.NewConnection()
 
-	//cark := cyberArk.NewCyberarkRetreivalService()
+	cark := cyberArk.NewCyberarkRetreivalService()
 
 	dailyStore := monitor.NewMongoStore(db)
 	recentStore := fileChecker.NewMongoStore(db)
@@ -50,7 +51,7 @@ func main() {
 			Help:      "Total duration of requests in microseconds.",
 		}, fieldKeys), json)
 
-	mon := monitor.NewService(json, fieldKeys, logger, dailyStore, recentStore)
+	mon := monitor.NewService(cark, json, fieldKeys, logger, dailyStore, recentStore)
 	mon = monitor.NewLoggingService(log.With(logger, "component", "fileMonitor"), mon)
 	mon = monitor.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace: "api",
@@ -74,6 +75,7 @@ func main() {
 
 	mux.Handle("/fileStatus", monitor.MakeHandler(mon, httpLogger, nil))
 	mux.Handle("/setGlobalState", monitor.MakeHandler(mon, httpLogger, nil))
+	mux.Handle("/updateCredentials", monitor.MakeHandler(mon, httpLogger, nil))
 	mux.Handle("/backdated", monitor.MakeHandler(mon, httpLogger, nil))
 
 	http.Handle("/", accessControl(mux))
