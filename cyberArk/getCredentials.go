@@ -59,7 +59,7 @@ func (s *service) GetCyberarkPassword() error {
 
 func (s *service) updateCedentialsFile() {
 
-	err := ioutil.WriteFile("/opt/app/creds", []byte(fmt.Sprintf("username=%v\npassword=%v", s.Username, s.Password)), 0755)
+	err := ioutil.WriteFile("/opt/creds", []byte(fmt.Sprintf("username=%v\npassword=%v", s.Username, s.Password)), 0755)
 	if err != nil {
 		log.Printf("Failed writing to credentials file with the following error: %v", err)
 	}
