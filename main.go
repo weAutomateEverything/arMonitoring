@@ -15,7 +15,7 @@ import (
 	"github.com/weAutomateEverything/fileMonitorService/jsonFileInteraction"
 	"github.com/weAutomateEverything/fileMonitorService/monitor"
 	"github.com/weAutomateEverything/fileMonitorService/snmp"
-	"github.com/weAutomateEverything/go2hal/database"
+	"github.com/weAutomateEverything/fileMonitorService/database"
 	"os/signal"
 	"syscall"
 )
