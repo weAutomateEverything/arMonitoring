@@ -10,11 +10,12 @@ import (
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"strings"
 	"github.com/weAutomateEverything/fileMonitorService/cyberArk"
+	"time"
 )
 
 type Service interface {
-	StatusResults() map[string]map[string]string
-	getDatedGlobalStateDaily(date string) (map[string]map[string]string, error)
+	StatusResults() Response
+	getDatedGlobalStateDaily(date string) (Response, error)
 	resetValues()
 	resetAfterHoursValues()
 	storeGlobalStateDaily()
@@ -27,7 +28,18 @@ type service struct {
 	cark 		 cyberArk.Service
 }
 
-//Create New monitor instance
+type Response struct {
+	Locations []Location `json:"locations"`
+}
+
+type Location struct {
+	Tab          string `json:"tab"`
+	LocationName string `json:"locationname"`
+	Date 		 string `json:"date"`
+	Files        map[string]string `json:"files"`
+}
+
+//Create new Filechecker instance in memory for each location
 func NewService(cark cyberArk.Service,json jsonFileInteraction.Service, fieldKeys []string, logger log.Logger, store Store, fileStore fileChecker.Store) Service {
 
 	s := &service{store: store, cark: cark}
@@ -36,7 +48,7 @@ func NewService(cark cyberArk.Service,json jsonFileInteraction.Service, fieldKey
 
 	for index := range locations {
 
-		location := fileChecker.NewFileChecker(json, fileStore, strings.Title(locations[index].Name), locations[index].MountPath, json.ReturnBackdatedFilesArray(), json.ReturnAfterHoursFilesArray(), locations[index].Files...)
+		location := fileChecker.NewFileChecker(json,locations[index].TabNumber ,fileStore, strings.Title(locations[index].Name), locations[index].MountPath, json.ReturnBackdatedFilesArray(), json.ReturnAfterHoursFilesArray(), locations[index].Files...)
 		location = fileChecker.NewLoggingService(log.With(logger, "component", locations[index].Name+"FileChecker"), location)
 		location = fileChecker.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 			Namespace: "api",
@@ -87,22 +99,21 @@ func (s *service) resetAfterHoursValues() {
 	}
 }
 
-func (s *service) StatusResults() map[string]map[string]string {
+func (s *service) StatusResults() Response {
 
-	response := make(map[string]map[string]string)
+	response := Response{}
 	for _, loc := range s.globalStatus {
-
-		response[loc.GetLocationName()] = loc.GetValues()
+		response.Locations = append(response.Locations, Location{loc.GetTabNumber(),loc.GetLocationName(),time.Now().Format("20060102"),loc.GetValues()})
 	}
 
 	return response
 }
 
 func (s *service) storeGlobalStateDaily() {
-	s.store.setGlobalStateDaily(s.StatusResults())
+	s.store.setGlobalStateDaily(s.StatusResults().Locations)
 }
 
-func (s *service) getDatedGlobalStateDaily(date string) (map[string]map[string]string, error) {
+func (s *service) getDatedGlobalStateDaily(date string) (Response, error) {
 	return s.store.getGlobalStateDailyForThisDate(date)
 }
 

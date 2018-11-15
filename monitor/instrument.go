@@ -19,7 +19,7 @@ func NewInstrumentService(counter metrics.Counter, latency metrics.Histogram, s 
 	}
 }
 
-func (s *instrumentingService) StatusResults() map[string]map[string]string{
+func (s *instrumentingService) StatusResults() Response{
 	defer func(begin time.Time) {
 		s.requestCount.With("method", "StatusResults").Add(1)
 		s.requestLatency.With("method", "StatusResults").Observe(time.Since(begin).Seconds())

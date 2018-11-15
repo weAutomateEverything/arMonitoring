@@ -31,6 +31,7 @@ type FileName struct {
 
 type Location struct {
 	Name      string   `json:"name"`
+	TabNumber string   `json:"tabnumber"`
 	MountPath string   `json:"mountpath"`
 	Files     []string `json:"files"`
 }
