@@ -14,7 +14,7 @@ func NewLoggingService(logger log.Logger, s Service) Service {
 	return &loggingService{logger, s}
 }
 
-func (s *loggingService) StatusResults() map[string]map[string]string{
+func (s *loggingService) StatusResults() Response{
 	defer func(begin time.Time) {
 		s.logger.Log(
 			"method", "StatusResults",

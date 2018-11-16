@@ -7,8 +7,8 @@ import (
 )
 
 type Store interface {
-	setGlobalStateDaily(globalFileStatus map[string]map[string]string) error
-	getGlobalStateDailyForThisDate(searchDate string) (map[string]map[string]string, error)
+	setGlobalStateDaily(globalFileStatus []Location) error
+	getGlobalStateDailyForThisDate(searchDate string) (Response, error)
 }
 
 type mongoStore struct {
@@ -17,27 +17,27 @@ type mongoStore struct {
 
 type globalState struct {
 	Date             string `bson:"_id,omitempty"`
-	GlobalFileStatus map[string]map[string]string
+	Locations []Location
 }
 
 func NewMongoStore(mongo *mgo.Database) Store {
 	return &mongoStore{mongo}
 }
 
-func (s mongoStore) setGlobalStateDaily(globalFileStatus map[string]map[string]string) error {
+func (s mongoStore) setGlobalStateDaily(globalFileStatus []Location) error {
 	log.Println("Storing daily global state")
 	c := s.mongo.C("GlobalStateDaily")
-	stateItem := globalState{Date: time.Now().Format("02012006"), GlobalFileStatus: globalFileStatus}
+	stateItem := globalState{Date: time.Now().Format("02012006"), Locations: globalFileStatus}
 	return c.Insert(stateItem)
 }
 
-func (s mongoStore) getGlobalStateDailyForThisDate(searchDate string) (map[string]map[string]string, error) {
+func (s mongoStore) getGlobalStateDailyForThisDate(searchDate string) (Response, error) {
 	log.Printf("Retreiving global state for %v", searchDate)
 	c := s.mongo.C("GlobalStateDaily")
 	var gs globalState
 	err := c.FindId(searchDate).One(&gs)
 	if err != nil {
-		return nil, err
+		return Response{}, err
 	}
-	return gs.GlobalFileStatus, nil
+	return Response{gs.Locations}, nil
 }

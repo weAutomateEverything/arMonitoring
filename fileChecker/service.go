@@ -2,7 +2,6 @@ package fileChecker
 
 import (
 	"fmt"
-	"github.com/matryer/try"
 	"github.com/weAutomateEverything/fileMonitorService/jsonFileInteraction"
 	"io"
 	"log"
@@ -14,9 +13,10 @@ import (
 type Service interface {
 	GetValues() map[string]string
 	GetLocationName() string
+	GetTabNumber() string
 	Reset()
 	ResetAfterHours()
-	setValues(name, mountpath string, bdFiles []string, files []string, store Store)
+	setValues(name, mountpath string, bdFiles, files []string, store Store)
 	storeLocationStateRecent(name string, fileStatus map[string]string)
 	setFileStatus(name, dirPath, fileContains string, bdFiles []string, store Store) (string, error)
 	getListOfFilesInPath(path string) ([]string, error)
@@ -25,6 +25,7 @@ type Service interface {
 
 type service struct {
 	locationName    string
+	tabNumner       string
 	mountPath       string
 	files           []string
 	backDatedFiles  []string
@@ -35,10 +36,11 @@ type service struct {
 }
 
 //Create New FileChecker instance
-func NewFileChecker(json jsonFileInteraction.Service, store Store, name, mountpath string, bdFiles []string, aHFiles []string, files ...string) Service {
+func NewFileChecker(json jsonFileInteraction.Service, tabNumber string, store Store, name, mountpath string, bdFiles []string, aHFiles []string, files ...string) Service {
 
 	s := &service{
 		locationName:    name,
+		tabNumner:       tabNumber,
 		mountPath:       mountpath,
 		files:           files,
 		backDatedFiles:  bdFiles,
@@ -66,13 +68,17 @@ func NewFileChecker(json jsonFileInteraction.Service, store Store, name, mountpa
 
 func (s *service) GetValues() map[string]string {
 
-	humanReadableFileStatusResponse := s.convertFileNamesToHumanReadableNames()
-
-	return humanReadableFileStatusResponse
+	return s.fileStatus
 }
 
 func (s *service) GetLocationName() string {
+
 	return s.locationName
+}
+
+func (s *service) GetTabNumber() string {
+
+	return s.tabNumner
 }
 
 func (s *service) Reset() {
@@ -83,6 +89,7 @@ func (s *service) Reset() {
 		}
 	}
 }
+
 func (s *service) ResetAfterHours() {
 	log.Printf("Resetting %s", s.locationName)
 	for k := range s.fileStatus {
@@ -100,17 +107,19 @@ func (s *service) setValues(name, mountpath string, bdFiles, files []string, sto
 		notAccessableOrEmpty := isShareFolderEmpty(mountpath)
 
 		for _, x := range files {
+			//Execute the following if the share is inaccessible
 			if notAccessableOrEmpty {
 				for _, file := range files {
 					s.fileStatus[file] = "unaccessable"
 				}
 				continue
 			}
+			//Retrieve the status for the current file in the loop
 			value, err := s.setFileStatus(name, mountpath, x, bdFiles, store)
 			if err != nil {
 				log.Println(err)
 			}
-			//Test for existence of key in map
+			//Reset inaccessible to notreceived once access has been re-established
 			if _, ok := s.fileStatus[x]; ok {
 				if s.fileStatus[x] == "unaccessable" {
 					s.fileStatus[x] = "notreceived"
@@ -119,12 +128,12 @@ func (s *service) setValues(name, mountpath string, bdFiles, files []string, sto
 					continue
 				}
 			}
+			//Set the value of the current file referenced in loop
 			s.fileStatus[x] = value
 		}
-
+		//Store These latest notification stats in the Mongo DB
 		s.storeLocationStateRecent(s.locationName, s.fileStatus)
 
-		log.Println(fmt.Sprintf("Completed file confirmation process on %s share", name))
 		time.Sleep(1 * time.Minute)
 	}
 }
@@ -135,21 +144,10 @@ func (s *service) storeLocationStateRecent(name string, fileStatus map[string]st
 
 func (s *service) setFileStatus(name, dirPath, fileContains string, bdFiles []string, store Store) (string, error) {
 
-	var fileList []string
+	fileList, err := s.getListOfFilesInPath(dirPath)
 
-	//Attempt connection
-	err := try.Do(func(attempt int) (bool, error) {
-		var err error
-		fileList, err = s.getListOfFilesInPath(dirPath)
-		if err != nil {
-			log.Println(fmt.Sprintf("Failed to access %s. Trying again in 2 seconds", dirPath))
-			time.Sleep(2 * time.Second)
-		}
-		return attempt < 5, err
-	})
 	if err != nil {
-		log.Println(fmt.Sprintf("Unable to access %s, Please confirm share mount access", dirPath))
-		return "", err
+		log.Println(fmt.Sprintf("Failed to access %s. Trying again in 2 seconds", dirPath))
 	}
 
 	yesterdayDate := time.Now().AddDate(0, 0, -1).Format("20060102")
