@@ -25,7 +25,7 @@ type Service interface {
 
 type service struct {
 	locationName    string
-	tabNumner       string
+	tabNumber       string
 	mountPath       string
 	files           []string
 	backDatedFiles  []string
@@ -40,7 +40,7 @@ func NewFileChecker(json jsonFileInteraction.Service, tabNumber string, store St
 
 	s := &service{
 		locationName:    name,
-		tabNumner:       tabNumber,
+		tabNumber:       tabNumber,
 		mountPath:       mountpath,
 		files:           files,
 		backDatedFiles:  bdFiles,
@@ -68,7 +68,9 @@ func NewFileChecker(json jsonFileInteraction.Service, tabNumber string, store St
 
 func (s *service) GetValues() map[string]string {
 
-	return s.fileStatus
+	humanReadableFileStatusResponse := s.convertFileNamesToHumanReadableNames()
+
+	return humanReadableFileStatusResponse
 }
 
 func (s *service) GetLocationName() string {
@@ -78,7 +80,7 @@ func (s *service) GetLocationName() string {
 
 func (s *service) GetTabNumber() string {
 
-	return s.tabNumner
+	return s.tabNumber
 }
 
 func (s *service) Reset() {
