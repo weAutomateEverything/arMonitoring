@@ -18,18 +18,36 @@ import (
 	"github.com/weAutomateEverything/fileMonitorService/database"
 	"os/signal"
 	"syscall"
+	"gopkg.in/mgo.v2"
+	"time"
 )
 
 func main() {
 
 	var logger log.Logger
+	var db *mgo.Database
+	var errorage error
 	logger = log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
 	logger = level.NewFilter(logger, level.AllowAll())
 	logger = log.With(logger, "ts", log.DefaultTimestamp)
 
+	go func() {
+		sn := snmp.NewService()
+		sn = snmp.NewLoggingService(log.With(logger, "component", "snmp"), sn)
+	}()
+
 	fieldKeys := []string{"method"}
 
-	db := database.NewConnection()
+
+	for true {
+		db, errorage = database.NewConnection()
+		if errorage != nil {
+			fmt.Println("Failed to access MongoDB. Retrying in 60 seconds")
+			time.Sleep(1 * time.Minute)
+		}else {
+			break
+		}
+	}
 
 	cark := cyberArk.NewCyberarkRetreivalService()
 
@@ -65,9 +83,6 @@ func main() {
 			Name:      "request_latency_microseconds",
 			Help:      "Total duration of requests in microseconds.",
 		}, fieldKeys), mon)
-
-	sn := snmp.NewService()
-	sn = snmp.NewLoggingService(log.With(logger, "component", "snmp"), sn)
 
 	httpLogger := log.With(logger, "component", "http")
 
