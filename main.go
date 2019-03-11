@@ -11,14 +11,14 @@ import (
 	"os"
 
 	//"github.com/weAutomateEverything/fileMonitorService/cyberArk"
+	"github.com/weAutomateEverything/fileMonitorService/database"
 	"github.com/weAutomateEverything/fileMonitorService/fileChecker"
 	"github.com/weAutomateEverything/fileMonitorService/jsonFileInteraction"
 	"github.com/weAutomateEverything/fileMonitorService/monitor"
 	"github.com/weAutomateEverything/fileMonitorService/snmp"
-	"github.com/weAutomateEverything/fileMonitorService/database"
+	"gopkg.in/mgo.v2"
 	"os/signal"
 	"syscall"
-	"gopkg.in/mgo.v2"
 	"time"
 )
 
@@ -38,13 +38,12 @@ func main() {
 
 	fieldKeys := []string{"method"}
 
-
 	for true {
 		db, errorage = database.NewConnection()
 		if errorage != nil {
 			fmt.Println("Failed to access MongoDB. Retrying in 60 seconds")
 			time.Sleep(1 * time.Minute)
-		}else {
+		} else {
 			break
 		}
 	}
