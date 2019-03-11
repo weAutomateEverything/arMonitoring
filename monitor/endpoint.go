@@ -23,14 +23,14 @@ func makeSetGlobalStatusRequestEndpoint(s Service) endpoint.Endpoint {
 	}
 }
 
-func makeUpdateCredentialsEndpoint(s Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-
-		s.updateCyberarkCredentials()
-
-		return nil, nil
-	}
-}
+//func makeUpdateCredentialsEndpoint(s Service) endpoint.Endpoint {
+//	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+//
+//		s.updateCyberarkCredentials()
+//
+//		return nil, nil
+//	}
+//}
 
 func makeGetDatedGlobalStateRequestEndpoint(s Service) endpoint.Endpoint {
 

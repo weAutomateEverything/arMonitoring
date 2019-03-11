@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/weAutomateEverything/fileMonitorService/cyberArk"
+	//"github.com/weAutomateEverything/fileMonitorService/cyberArk"
 	"github.com/weAutomateEverything/fileMonitorService/fileChecker"
 	"github.com/weAutomateEverything/fileMonitorService/jsonFileInteraction"
 	"github.com/weAutomateEverything/fileMonitorService/monitor"
@@ -49,7 +49,7 @@ func main() {
 		}
 	}
 
-	cark := cyberArk.NewCyberarkRetreivalService()
+	//cark := cyberArk.NewCyberarkRetreivalService()
 
 	dailyStore := monitor.NewMongoStore(db)
 	recentStore := fileChecker.NewMongoStore(db)
@@ -69,7 +69,7 @@ func main() {
 			Help:      "Total duration of requests in microseconds.",
 		}, fieldKeys), json)
 
-	mon := monitor.NewService(cark, json, fieldKeys, logger, dailyStore, recentStore)
+	mon := monitor.NewService(json, fieldKeys, logger, dailyStore, recentStore)
 	mon = monitor.NewLoggingService(log.With(logger, "component", "fileMonitor"), mon)
 	mon = monitor.NewInstrumentService(kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace: "api",
