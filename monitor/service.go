@@ -19,7 +19,7 @@ type Service interface {
 	resetValues()
 	resetAfterHoursValues()
 	storeGlobalStateDaily()
-	updateCyberarkCredentials()
+	//updateCyberarkCredentials()
 }
 
 type service struct {
@@ -40,9 +40,9 @@ type Location struct {
 }
 
 //Create new Filechecker instance in memory for each location
-func NewService(cark cyberArk.Service,json jsonFileInteraction.Service, fieldKeys []string, logger log.Logger, store Store, fileStore fileChecker.Store) Service {
+func NewService(json jsonFileInteraction.Service, fieldKeys []string, logger log.Logger, store Store, fileStore fileChecker.Store) Service {
 
-	s := &service{store: store, cark: cark}
+	s := &service{store: store}
 
 	locations := json.ReturnLocationsArray()
 
@@ -117,6 +117,6 @@ func (s *service) getDatedGlobalStateDaily(date string) (Response, error) {
 	return s.store.getGlobalStateDailyForThisDate(date)
 }
 
-func (s *service) updateCyberarkCredentials() {
-	s.cark.GetCyberarkPassword()
-}
+//func (s *service) updateCyberarkCredentials() {
+//	s.cark.GetCyberarkPassword()
+//}
