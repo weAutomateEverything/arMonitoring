@@ -52,7 +52,7 @@ func NewFileChecker(json jsonFileInteraction.Service, tabNumber string, store St
 
 	storeContents, err := store.getLocationStateRecent(name)
 	if err != nil {
-		log.Println("Failed to access persistance layer with the following error: ", err)
+		log.Println("Failed to access persistence layer with the following error: ", err)
 	}
 
 	if storeContents != nil {
@@ -204,16 +204,24 @@ func createHumanReadableResponseMap(notifications map[string]string) map[string]
 
 func (s *service) convertFileNamesToHumanReadableNames() map[string]string {
 
-	humanReadableFileNameList := s.json.ReturnFileNamesArray()
+	humanReadableFileNameArray := s.json.ReturnFileNamesArray()
 
 	humanReadableFileStatusResponse := createHumanReadableResponseMap(s.fileStatus)
 
-	for _, fileName := range humanReadableFileNameList {
-		if _, ok := s.fileStatus[fileName.Name]; ok {
-			humanReadableFileStatusResponse[fileName.ReadableName] = humanReadableFileStatusResponse[fileName.Name]
-			delete(humanReadableFileStatusResponse, fileName.Name)
+	for _, fileName := range humanReadableFileNameArray {
+		for k, v := range humanReadableFileStatusResponse {
+			if strings.Contains(k, fileName.Name) && fileName.ReadableName == "" {
+				humanReadableFileStatusResponse[fileName.Name] = v
+				delete(humanReadableFileStatusResponse, k)
+			}
+			if strings.Contains(k, fileName.Name) && fileName.ReadableName != "" {
+				humanReadableFileStatusResponse[fileName.ReadableName] = v
+				delete(humanReadableFileStatusResponse, fileName.Name)
+			}
 		}
+
 	}
+
 	return humanReadableFileStatusResponse
 }
 
