@@ -204,26 +204,30 @@ func createHumanReadableResponseMap(notifications map[string]string) map[string]
 
 func (s *service) convertFileNamesToHumanReadableNames() map[string]string {
 
-	humanReadableFileNameArray := s.json.ReturnFileNamesArray()
+	genericFileNameArray := s.json.ReturnGenericFileNameArray()
+	humanReadableFileNameList := s.json.ReturnFileNamesArray()
 
 	humanReadableFileStatusResponse := createHumanReadableResponseMap(s.fileStatus)
 
-	for _, fileName := range humanReadableFileNameArray {
-		for k, v := range humanReadableFileStatusResponse {
-			if strings.Contains(k, fileName.Name) && fileName.ReadableName == "" {
-				humanReadableFileStatusResponse[fileName.Name] = v
+	for k, v := range humanReadableFileStatusResponse {
+		for _, fileName := range genericFileNameArray {
+			if strings.Contains(k, fileName) {
+				humanReadableFileStatusResponse[fileName] = v
 				delete(humanReadableFileStatusResponse, k)
-			}
-			if strings.Contains(k, fileName.Name) && fileName.ReadableName != "" {
-				humanReadableFileStatusResponse[fileName.ReadableName] = v
-				delete(humanReadableFileStatusResponse, fileName.Name)
 			}
 		}
 
 	}
+	for _, fileName := range humanReadableFileNameList {
+		if _, ok := s.fileStatus[fileName.Name]; ok {
+			humanReadableFileStatusResponse[fileName.ReadableName] = humanReadableFileStatusResponse[fileName.Name]
+			delete(humanReadableFileStatusResponse, fileName.Name)
+		}
+	}
 
 	return humanReadableFileStatusResponse
 }
+
 
 func isShareFolderEmpty(path string) bool {
 	dir, err := os.Open(path)

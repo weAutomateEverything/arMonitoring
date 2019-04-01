@@ -13,6 +13,7 @@ type Service interface {
 	ReturnLocationsArray() []Location
 	ReturnBackdatedFilesArray() []string
 	ReturnAfterHoursFilesArray() []string
+	ReturnGenericFileNameArray() []string
 	ReturnFileExpectedArrivalTimesMap() []ExpectedArrivalTimes
 }
 
@@ -21,6 +22,7 @@ type service struct {
 	Locations                []Location             `json:"locations"`
 	BackdatedFiles           []string               `json:"backdatedfiles"`
 	AfterHoursFiles          []string               `json:"afterhoursfiles"`
+	GenericFileNames         []string               `json:"genericnames"`
 	FileExpectedArrivalTimes []ExpectedArrivalTimes `json:"expectedarrivaltimes"`
 }
 
@@ -45,6 +47,7 @@ func NewJSONService() Service {
 	json := &service{}
 	json.UnmarshalJSONFile("/opt/app/fileNames.json")
 	json.UnmarshalJSONFile("/opt/app/locations.json")
+	json.UnmarshalJSONFile("/opt/app/genericNames.json")
 	json.UnmarshalJSONFile("/opt/app/fileExpectedArrivalTime.json")
 	return json
 }
@@ -63,6 +66,10 @@ func (s *service) ReturnBackdatedFilesArray() []string {
 
 func (s *service) ReturnAfterHoursFilesArray() []string {
 	return s.AfterHoursFiles
+}
+
+func (s *service) ReturnGenericFileNameArray() []string {
+	return s.GenericFileNames
 }
 
 func (s *service) ReturnFileExpectedArrivalTimesMap() []ExpectedArrivalTimes {
