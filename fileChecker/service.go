@@ -208,25 +208,24 @@ func (s *service) convertFileNamesToHumanReadableNames() map[string]string {
 	humanReadableFileNameList := s.json.ReturnFileNamesArray()
 
 	humanReadableFileStatusResponse := createHumanReadableResponseMap(s.fileStatus)
+	generigNameMap := make(map[string]string)
 
 	for k, v := range humanReadableFileStatusResponse {
 		for _, fileName := range genericFileNameArray {
-			if strings.Contains(k, fileName) {
-				humanReadableFileStatusResponse[fileName] = v
-				delete(humanReadableFileStatusResponse, k)
+			if strings.Contains(k, fileName){
+				generigNameMap[fileName] = v
 			}
 		}
 	}
 	for _, fileName := range humanReadableFileNameList {
 		if _, ok := s.fileStatus[fileName.Name]; ok {
-			humanReadableFileStatusResponse[fileName.ReadableName] = humanReadableFileStatusResponse[fileName.Name]
-			delete(humanReadableFileStatusResponse, fileName.Name)
+			generigNameMap[fileName.ReadableName] = generigNameMap[fileName.Name]
+			delete(generigNameMap, fileName.Name)
 		}
 	}
 
-	return humanReadableFileStatusResponse
+	return generigNameMap
 }
-
 
 func isShareFolderEmpty(path string) bool {
 	dir, err := os.Open(path)
@@ -268,11 +267,11 @@ func isFileAfterHours(file string, aHFiles []string) bool {
 	return fileIsAfterHours
 }
 
-func convertTime(specifictime ,unconvertedTime string) time.Time {
+func convertTime(specifictime, unconvertedTime string) time.Time {
 
 	t, err := time.Parse("15:04:05", unconvertedTime)
 	if err != nil {
-		log.Printf("Failed to convert %v with the following error: %v",specifictime, err)
+		log.Printf("Failed to convert %v with the following error: %v", specifictime, err)
 	}
 	return t
 }
