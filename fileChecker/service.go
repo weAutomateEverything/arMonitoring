@@ -272,7 +272,7 @@ func convertTime(specifictime ,unconvertedTime string) time.Time {
 
 	t, err := time.Parse("15:04:05", unconvertedTime)
 	if err != nil {
-		log.Printf("Failed to convert time with the following error: %v", err)
+		log.Printf("Failed to convert %v with the following error: %v",specifictime, err)
 	}
 	return t
 }
