@@ -156,7 +156,7 @@ func (s *service) setFileStatus(name, dirPath, fileContains string, bdFiles []st
 	currentDate := time.Now().Format("20060102")
 	currentTime := time.Now().Format("15:04:05")
 
-	convertedTime := convertTime(currentTime)
+	convertedTime := convertTime("currentTime ", currentTime)
 
 	for _, file := range fileList {
 
@@ -216,7 +216,6 @@ func (s *service) convertFileNamesToHumanReadableNames() map[string]string {
 				delete(humanReadableFileStatusResponse, k)
 			}
 		}
-
 	}
 	for _, fileName := range humanReadableFileNameList {
 		if _, ok := s.fileStatus[fileName.Name]; ok {
@@ -269,7 +268,7 @@ func isFileAfterHours(file string, aHFiles []string) bool {
 	return fileIsAfterHours
 }
 
-func convertTime(unconvertedTime string) time.Time {
+func convertTime(specifictime ,unconvertedTime string) time.Time {
 
 	t, err := time.Parse("15:04:05", unconvertedTime)
 	if err != nil {
@@ -312,7 +311,7 @@ func (s *service) expectedFileArivalTime(file string) time.Time {
 		}
 	}
 
-	t := convertTime(expectedTime)
+	t := convertTime("expectedTime", expectedTime)
 
 	return t
 }
