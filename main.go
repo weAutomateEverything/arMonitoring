@@ -10,12 +10,10 @@ import (
 	"net/http"
 	"os"
 
-	//"github.com/weAutomateEverything/fileMonitorService/cyberArk"
 	"github.com/weAutomateEverything/fileMonitorService/database"
 	"github.com/weAutomateEverything/fileMonitorService/fileChecker"
 	"github.com/weAutomateEverything/fileMonitorService/jsonFileInteraction"
 	"github.com/weAutomateEverything/fileMonitorService/monitor"
-	"github.com/weAutomateEverything/fileMonitorService/snmp"
 	"gopkg.in/mgo.v2"
 	"os/signal"
 	"syscall"
@@ -31,11 +29,6 @@ func main() {
 	logger = level.NewFilter(logger, level.AllowAll())
 	logger = log.With(logger, "ts", log.DefaultTimestamp)
 
-	go func() {
-		sn := snmp.NewService()
-		sn = snmp.NewLoggingService(log.With(logger, "component", "snmp"), sn)
-	}()
-
 	fieldKeys := []string{"method"}
 
 	for true {
@@ -47,8 +40,6 @@ func main() {
 			break
 		}
 	}
-
-	//cark := cyberArk.NewCyberarkRetreivalService()
 
 	dailyStore := monitor.NewMongoStore(db)
 	recentStore := fileChecker.NewMongoStore(db)

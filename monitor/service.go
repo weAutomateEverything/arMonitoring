@@ -9,7 +9,6 @@ import (
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"strings"
-	"github.com/weAutomateEverything/fileMonitorService/cyberArk"
 	"time"
 )
 
@@ -25,7 +24,6 @@ type Service interface {
 type service struct {
 	globalStatus []fileChecker.Service
 	store        Store
-	cark 		 cyberArk.Service
 }
 
 type Response struct {
@@ -116,7 +114,3 @@ func (s *service) storeGlobalStateDaily() {
 func (s *service) getDatedGlobalStateDaily(date string) (Response, error) {
 	return s.store.getGlobalStateDailyForThisDate(date)
 }
-
-//func (s *service) updateCyberarkCredentials() {
-//	s.cark.GetCyberarkPassword()
-//}
